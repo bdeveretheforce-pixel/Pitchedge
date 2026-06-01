@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PitchEdge — MLB Pitcher Props · June 1, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d11;
+    --surface: #111520;
+    --surface2: #171d2b;
+    --border: #1e2840;
+    --border-bright: #2a3550;
+    --text: #e8ecf5;
+    --text-muted: #6b7898;
+    --text-dim: #3d4f6e;
+    --green: #00e676;
+    --green-dim: rgba(0,230,118,0.08);
+    --green-mid: rgba(0,230,118,0.15);
+    --red: #ff3d5a;
+    --red-dim: rgba(255,61,90,0.08);
+    --yellow: #ffd600;
+    --yellow-dim: rgba(255,214,0,0.08);
+    --blue: #4d9fff;
+    --blue-dim: rgba(77,159,255,0.08);
+    --pod: #ffd600;
+    --pod-dim: rgba(255,214,0,0.10);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+  nav {
+    position:sticky; top:0; z-index:100;
+    background:rgba(10,13,17,0.95); backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 24px; height:56px;
+  }
+  .nav-logo { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:22px; letter-spacing:.05em; display:flex; align-items:center; gap:8px; }
+  .nav-logo span { color:var(--green); }
+  .nav-dot { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+  .nav-links { display:flex; gap:0; list-style:none; }
+  .nav-links a { display:block; padding:8px 16px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); text-decoration:none; border-radius:6px; transition:color .2s; }
+  .nav-links a:hover,.nav-links a.active { color:var(--text); background:var(--surface); }
+  .nav-date { font-family:'Space Mono',monospace; font-size:11px; color:var(--text-muted); }
+
+  main { max-width:1280px; margin:0 auto; padding:32px 24px; }
+
+  .page-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:16px; }
+  .page-header h1 { font-family:'Barlow Condensed',sans-serif; font-size:42px; font-weight:900; letter-spacing:-.01em; line-height:1; }
+  .page-header h1 em { font-style:normal; color:var(--green); }
+  .slate-summary { display:flex; gap:24px; }
+  .stat-pill { text-align:center; }
+  .stat-pill .val { font-family:'Space Mono',monospace; font-size:24px; font-weight:700; display:block; line-height:1; }
+  .stat-pill .lbl { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); font-weight:600; margin-top:4px; display:block; }
+  .stat-pill.green .val { color:var(--green); }
+  .stat-pill.blue .val { color:var(--blue); }
+  .stat-pill.yellow .val { color:var(--yellow); }
+
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; margin-top:40px; }
+  .section-header h2 { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
+  .section-line { flex:1; height:1px; background:var(--border); }
+  .section-count { font-family:'Space Mono',monospace; font-size:11px; color:var(--text-dim); }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    background:rgba(255,214,0,0.05); border:1px solid rgba(255,214,0,0.15);
+    border-radius:8px; padding:10px 16px; font-size:12px; color:var(--text-muted);
+    margin-bottom:24px; display:flex; align-items:center; gap:10px;
+  }
+  .disclaimer strong { color:var(--yellow); }
+
+  /* NOTE CARD */
+  .note-card {
+    background:rgba(77,159,255,0.05); border:1px solid rgba(77,159,255,0.2);
+    border-radius:8px; padding:12px 16px; font-size:12px; color:var(--text-muted);
+    margin-top:-20px; margin-bottom:24px;
+  }
+  .note-card strong { color:var(--blue); }
+
+  /* POD */
+  .pod-card { background:linear-gradient(135deg,rgba(255,214,0,.06) 0%,var(--surface) 60%); border:1px solid rgba(255,214,0,.25); border-radius:16px; padding:28px 32px; position:relative; overflow:hidden; margin-top:8px; animation:fadeIn .5s ease both; }
+  .pod-card::before { content:''; position:absolute; top:0; right:0; width:200px; height:200px; background:radial-gradient(ellipse at top right,rgba(255,214,0,.08),transparent 70%); pointer-events:none; }
+  .pod-label { display:inline-flex; align-items:center; gap:6px; background:var(--pod-dim); border:1px solid rgba(255,214,0,.3); color:var(--pod); font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; padding:4px 10px; border-radius:100px; margin-bottom:16px; }
+  .pod-label::before { content:'★'; font-size:10px; }
+  .pod-main { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; flex-wrap:wrap; }
+  .pod-pitcher { font-family:'Barlow Condensed',sans-serif; font-size:40px; font-weight:900; letter-spacing:-.01em; color:var(--text); line-height:1; }
+  .pod-matchup { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; color:var(--text-muted); letter-spacing:.04em; margin-top:4px; }
+  .pod-stats { display:flex; gap:32px; }
+  .pod-stat { text-align:center; }
+  .pod-stat .val { font-family:'Space Mono',monospace; font-size:28px; font-weight:700; display:block; line-height:1; }
+  .pod-stat .lbl { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); font-weight:600; margin-top:6px; display:block; }
+  .pod-stat.green .val { color:var(--green); }
+  .pod-stat.pod .val { color:var(--pod); }
+  .pod-grade { display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:12px; background:var(--pod-dim); border:2px solid rgba(255,214,0,.4); font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:900; color:var(--pod); }
+  .pod-reasoning { margin-top:20px; padding-top:20px; border-top:1px solid var(--border); font-size:14px; color:var(--text-muted); line-height:1.6; }
+  .pod-reasoning strong { color:var(--text); }
+  .pod-badges { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+
+  /* BADGES */
+  .badge { display:inline-flex; align-items:center; gap:4px; font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:3px 8px; border-radius:4px; }
+  .badge-k-over { background:rgba(0,230,118,.12); color:var(--green); border:1px solid rgba(0,230,118,.25); }
+  .badge-k-under { background:rgba(255,61,90,.12); color:var(--red); border:1px solid rgba(255,61,90,.25); }
+  .badge-outs-over { background:rgba(77,159,255,.12); color:var(--blue); border:1px solid rgba(77,159,255,.25); }
+  .badge-outs-under { background:rgba(255,61,90,.12); color:var(--red); border:1px solid rgba(255,61,90,.25); }
+  .badge-pod { background:rgba(255,214,0,.12); color:var(--pod); border:1px solid rgba(255,214,0,.3); }
+  .badge-parlay { background:rgba(167,139,250,.12); color:#a78bfa; border:1px solid rgba(167,139,250,.25); }
+  .badge-pass { background:rgba(107,120,152,.12); color:var(--text-muted); border:1px solid var(--border); }
+  .badge-pending { background:var(--yellow-dim); color:var(--yellow); border:1px solid rgba(255,214,0,.2); }
+  .badge-watch { background:rgba(255,61,90,.08); color:var(--red); border:1px solid rgba(255,61,90,.2); }
+  .grade-a { background:rgba(0,230,118,.15); color:var(--green); border:1px solid rgba(0,230,118,.3); }
+  .grade-b { background:rgba(77,159,255,.15); color:var(--blue); border:1px solid rgba(77,159,255,.3); }
+  .grade-c { background:rgba(255,214,0,.12); color:var(--yellow); border:1px solid rgba(255,214,0,.25); }
+
+  /* PICK CARDS */
+  .picks-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:16px; }
+  .pick-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; position:relative; transition:border-color .2s,transform .2s; animation:fadeIn .4s ease both; }
+  .pick-card:hover { border-color:var(--border-bright); transform:translateY(-1px); }
+  .pick-card.grade-a-card { border-color:rgba(0,230,118,.2); }
+  .pick-card.grade-a-card:hover { border-color:rgba(0,230,118,.4); }
+  .pick-card:nth-child(1){animation-delay:.05s}.pick-card:nth-child(2){animation-delay:.10s}.pick-card:nth-child(3){animation-delay:.15s}.pick-card:nth-child(4){animation-delay:.20s}.pick-card:nth-child(5){animation-delay:.25s}
+  .pick-card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+  .pick-pitcher-name { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; line-height:1; color:var(--text); }
+  .pick-matchup { font-size:12px; color:var(--text-muted); margin-top:3px; font-weight:500; }
+  .pick-grade-badge { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:900; flex-shrink:0; }
+  .pick-stats-row { display:flex; margin-bottom:14px; background:var(--surface2); border-radius:8px; overflow:hidden; }
+  .pick-stat { flex:1; padding:10px 12px; text-align:center; border-right:1px solid var(--border); }
+  .pick-stat:last-child { border-right:none; }
+  .pick-stat .val { font-family:'Space Mono',monospace; font-size:16px; font-weight:700; display:block; line-height:1; }
+  .pick-stat .lbl { font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); font-weight:600; margin-top:4px; display:block; }
+  .pick-stat .val.green { color:var(--green); }
+  .pick-stat .val.blue { color:var(--blue); }
+  .pick-stat .val.yellow { color:var(--yellow); }
+  .pick-confidence-bar { height:3px; background:var(--border); border-radius:2px; margin-bottom:12px; overflow:hidden; }
+  .pick-confidence-fill { height:100%; border-radius:2px; transition:width .5s ease; }
+  .fill-a { background:var(--green); }
+  .fill-b { background:var(--blue); }
+  .fill-c { background:var(--yellow); }
+  .pick-reasoning { font-size:12px; color:var(--text-muted); line-height:1.5; border-top:1px solid var(--border); padding-top:12px; margin-top:4px; }
+  .pick-footer { display:flex; align-items:center; justify-content:space-between; margin-top:12px; }
+  .pick-badges { display:flex; gap:6px; flex-wrap:wrap; }
+  .pick-score { font-family:'Space Mono',monospace; font-size:11px; color:var(--text-dim); }
+
+  /* LAST 5 */
+  .last5 { display:flex; gap:3px; margin-top:6px; }
+  .l5-dot { width:18px; height:18px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:800; }
+  .l5-w { background:var(--green-mid); color:var(--green); }
+  .l5-l { background:var(--red-dim); color:var(--red); }
+  .l5-u { background:rgba(107,120,152,.15); color:var(--text-dim); }
+
+  /* PARLAY */
+  .parlay-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:16px; }
+  .parlay-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; }
+  .parlay-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .parlay-title { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:800; color:var(--text); }
+  .parlay-odds { font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--green); }
+  .parlay-legs { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+  .parlay-leg { display:flex; align-items:center; gap:10px; padding:8px 10px; background:var(--surface2); border-radius:8px; border:1px solid var(--border); }
+  .parlay-leg-num { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); width:16px; flex-shrink:0; }
+  .parlay-leg-info { flex:1; }
+  .parlay-leg-pitcher { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; color:var(--text); }
+  .parlay-leg-detail { font-size:11px; color:var(--text-muted); margin-top:1px; }
+  .parlay-leg-odds { font-family:'Space Mono',monospace; font-size:12px; color:var(--text-muted); flex-shrink:0; }
+  .parlay-risk { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-muted); padding-top:12px; border-top:1px solid var(--border); }
+  .risk-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .risk-low { background:var(--green); }
+  .risk-medium { background:var(--yellow); }
+  .risk-high { background:var(--red); }
+
+  /* RESULTS */
+  .results-strip { display:grid; grid-template-columns:repeat(5,1fr); background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-top:8px; }
+  .result-cell { padding:20px; text-align:center; border-right:1px solid var(--border); }
+  .result-cell:last-child { border-right:none; }
+  .result-cell .val { font-family:'Space Mono',monospace; font-size:28px; font-weight:700; display:block; line-height:1; }
+  .result-cell .lbl { font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); font-weight:600; margin-top:6px; display:block; }
+  .result-cell.green .val { color:var(--green); }
+  .result-cell.red .val { color:var(--red); }
+  .result-cell.yellow .val { color:var(--yellow); }
+  .result-cell.blue .val { color:var(--blue); }
+
+  /* AVOID */
+  .avoid-row { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; margin-bottom:8px; }
+  .avoid-row .pitcher { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; flex:1; }
+  .avoid-row .reason { font-size:12px; color:var(--text-muted); flex:2; }
+
+  /* FLAG */
+  .flag-card { background:rgba(255,61,90,.05); border:1px solid rgba(255,61,90,.2); border-radius:8px; padding:12px 16px; margin-bottom:8px; display:flex; align-items:flex-start; gap:12px; }
+  .flag-card .flag-icon { color:var(--red); font-size:14px; flex-shrink:0; margin-top:1px; }
+  .flag-card .flag-text { font-size:12px; color:var(--text-muted); line-height:1.5; }
+  .flag-card .flag-text strong { color:var(--red); }
+
+  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+  .watermark { position:fixed; bottom:20px; right:20px; font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); opacity:.5; pointer-events:none; }
+
+  @media(max-width:768px){
+    .picks-grid,.parlay-grid{grid-template-columns:1fr}
+    .results-strip{grid-template-columns:repeat(3,1fr)}
+    .pod-main{flex-direction:column}
+    .nav-links{display:none}
+    main{padding:24px 16px}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><div class="nav-dot"></div>PITCH<span>EDGE</span></div>
+  <ul class="nav-links">
+    <li><a href="#" class="active">Dashboard</a></li>
+    <li><a href="#">Daily Picks</a></li>
+    <li><a href="#">Parlays</a></li>
+    <li><a href="#">Results</a></li>
+    <li><a href="#">Admin</a></li>
+  </ul>
+  <div class="nav-date">Mon · Jun 1, 2026 · 7-Game Slate</div>
+</nav>
+
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1>June 1 <em>Pitcher Props</em></h1>
+      <div style="font-size:14px;color:var(--text-muted);margin-top:6px;">MLB Monday Slate · Strikeouts + Outs Recorded · Real Probable Starters</div>
+    </div>
+    <div class="slate-summary">
+      <div class="stat-pill green"><span class="val">2</span><span class="lbl">A Plays</span></div>
+      <div class="stat-pill blue"><span class="val">1</span><span class="lbl">B Plays</span></div>
+      <div class="stat-pill yellow"><span class="val">7</span><span class="lbl">Games</span></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠ Note:</strong> Lines shown are estimated pending live sportsbook data. Scores and projections are model-generated from verified 2026 season stats. Odds API integration coming in Phase 2.
+  </div>
+
+  <!-- SEASON RECORD -->
+  <div class="section-header" style="margin-top:0;">
+    <h2>Season Record</h2>
+    <div class="section-line"></div>
+    <div class="section-count">2026 · pending first picks</div>
+  </div>
+  <div class="results-strip">
+    <div class="result-cell"><span class="val" style="color:var(--text);">0</span><span class="lbl">Total Bets</span></div>
+    <div class="result-cell green"><span class="val">0</span><span class="lbl">Wins</span></div>
+    <div class="result-cell red"><span class="val">0</span><span class="lbl">Losses</span></div>
+    <div class="result-cell yellow"><span class="val">0</span><span class="lbl">Pushes</span></div>
+    <div class="result-cell blue"><span class="val">--</span><span class="lbl">Win %</span></div>
+  </div>
+
+  <!-- PLAY OF THE DAY -->
+  <div class="section-header">
+    <h2>Play of the Day</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="pod-card">
+    <div class="pod-label">Play of the Day</div>
+    <div class="pod-main">
+      <div>
+        <div class="pod-pitcher">Chase Burns</div>
+        <div class="pod-matchup">CIN vs KC · 7:10 PM ET · Great American Ball Park</div>
+        <div class="pod-badges" style="margin-top:12px;">
+          <span class="badge badge-k-over">K Over</span>
+          <span class="badge badge-pod">★ POD</span>
+          <span class="badge grade-a">A</span>
+        </div>
+      </div>
+      <div class="pod-stats">
+        <div class="pod-stat">
+          <span class="val" style="color:var(--text-muted);font-size:14px;">EST. LINE</span>
+          <span class="val" style="font-size:32px;color:var(--text);margin-top:4px;">6.5</span>
+          <span class="lbl">Strikeouts O/U</span>
+        </div>
+        <div class="pod-stat green">
+          <span class="val" style="color:var(--text-muted);font-size:14px;">PROJ</span>
+          <span class="val" style="font-size:32px;margin-top:4px;">8.1</span>
+          <span class="lbl">Projected Ks</span>
+        </div>
+        <div class="pod-stat pod">
+          <span class="val" style="color:var(--text-muted);font-size:14px;">SCORE</span>
+          <span class="val" style="font-size:32px;margin-top:4px;">86</span>
+          <span class="lbl">Confidence</span>
+        </div>
+        <div class="pod-grade">A</div>
+      </div>
+    </div>
+    <div class="pod-reasoning">
+      <strong>Why this plays:</strong> Burns enters with a 1.96 ERA, 0.96 WHIP, and 72 Ks across 64.1 innings — 10.1 K/9 and fourth-best in the NL. He has at least 7 strikeouts in 5 of his last 7 starts, including 8 Ks in his most recent outing vs the Mets. Kansas City starter Luinder Avila is making the transition from bullpen to rotation, which favors the over on Burns since KC may struggle to keep pace and Burns can work deep. KC has struck out at a league-average rate vs RHP this season but Burns' elite slider (43.7% whiff rate) neutralizes contact-heavy lineups. Great American Ball Park is a slight hitter-friendly environment but this is a strikeout prop, not a run prop. No IL history, no pitch count concerns — Burns averaged 95 pitches per start over his last 5. Line value is strong at an estimated 6.5 with a 1.6 K projection edge.
+    </div>
+  </div>
+
+  <!-- FLAGS -->
+  <div class="section-header">
+    <h2>Slate Flags</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="flag-card">
+    <div class="flag-icon">⚠</div>
+    <div class="flag-text"><strong>Ty Madden (DET) — IL Return.</strong> Madden is being activated off the IL with a forearm issue for tonight's start vs Tampa Bay. Forearm IL returns carry significant pitch count risk. Model has scored him Pass pending a line check — avoid both Ks and Outs props until his usage pattern is confirmed post-game.</div>
+  </div>
+  <div class="flag-card">
+    <div class="flag-icon">⚠</div>
+    <div class="flag-text"><strong>Shane Drohan (MIL) — Extended Opener Risk.</strong> Drohan is listed as an extended opener for SF vs MIL. Outs recorded prop is unplayable. K prop is also unreliable due to unknown IP ceiling. Skip both sides.</div>
+  </div>
+  <div class="flag-card">
+    <div class="flag-icon">⚠</div>
+    <div class="flag-text"><strong>Jacob deGrom (TEX) — May Struggles.</strong> deGrom posted a 5.72 ERA in May, surrendering 9 of his 13 home runs. Until he demonstrates stability, K Over bets carry real downside risk. Scored C — borderline pass.</div>
+  </div>
+
+  <!-- PARLAY CENTER -->
+  <div class="section-header">
+    <h2>Parlay Center</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="parlay-grid">
+
+    <!-- 2-LEG -->
+    <div class="parlay-card" style="border-color:rgba(0,230,118,.2);">
+      <div class="parlay-header">
+        <div>
+          <div class="parlay-title">2-Leg Parlay</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Safest · Recommended</div>
+        </div>
+        <div class="parlay-odds">~+275</div>
+      </div>
+      <div class="parlay-legs">
+        <div class="parlay-leg">
+          <div class="parlay-leg-num">01</div>
+          <div class="parlay-leg-info">
+            <div class="parlay-leg-pitcher">Chase Burns · K Over 6.5</div>
+            <div class="parlay-leg-detail">CIN vs KC · Score: 86 · Grade A</div>
+          </div>
+          <div class="parlay-leg-odds">est. -130</div>
+        </div>
+        <div class="parlay-leg">
+          <div class="parlay-leg-num">02</div>
+          <div class="parlay-leg-info">
+            <div class="parlay-leg-pitcher">Joe Ryan · K Over 6.5</div>
+            <div class="parlay-leg-detail">MIN vs CWS · Score: 78 · Grade B</div>
+          </div>
+          <div class="parlay-leg-odds">est. -120</div>
+        </div>
+      </div>
+      <div class="parlay-risk">
+        <div class="risk-dot risk-low"></div>
+        <span><strong style="color:var(--text);">Low risk.</strong> Burns and Ryan are the two strongest K plays on the slate. Different games, no correlation risk. Ryan has K'd 7+ in 3 of last 3 starts.</span>
+      </div>
+    </div>
+
+    <!-- 3-LEG -->
+    <div class="parlay-card" style="border-color:rgba(77,159,255,.2);">
+      <div class="parlay-header">
+        <div>
+          <div class="parlay-title">3-Leg Parlay</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Balanced · Value</div>
+        </div>
+        <div class="parlay-odds" style="color:var(--blue);">~+590</div>
+      </div>
+      <div class="parlay-legs">
+        <div class="parlay-leg">
+          <div class="parlay-leg-num">01</div>
+          <div class="parlay-leg-info">
+            <div class="parlay-leg-pitcher">Chase Burns · K Over 6.5</div>
+            <div class="parlay-leg-detail">CIN vs KC · Score: 86 · Grade A</div>
+          </div>
+          <div class="parlay-leg-odds">est. -130</div>
+        </div>
+        <div class="parlay-leg">
+          <div class="parlay-leg-num">02</div>
+          <div class="parlay-leg-info">
+            <div class="parlay-leg-pitcher">Joe Ryan · K Over 6.5</div>
+            <div class="parlay-leg-detail">MIN vs CWS · Score: 78 · Grade B</div>
+          </div>
+          <div class="parlay-leg-odds">est. -120</div>
+        </div>
+        <div class="parlay-leg">
+          <div class="parlay-leg-num">03</div>
+          <div class="parlay-leg-info">
+            <div class="parlay-leg-pitcher">Landen Roupp · K Over 5.5</div>
+            <div class="parlay-leg-detail">SF vs MIL · Score: 68 · Grade C</div>
+          </div>
+          <div class="parlay-leg-odds">est. -115</div>
+        </div>
+      </div>
+      <div class="parlay-risk">
+        <div class="risk-dot risk-medium"></div>
+        <span><strong style="color:var(--text);">Medium risk.</strong> Roupp has 7+ Ks in 6 of 11 starts but MIL matchup is tougher. Drohan opener means MIL bats could be stretched thin by the time Roupp gets deep.</span>
+      </div>
+    </div>
+
+    <!-- 4-LEG -->
+    <div class="parlay-card" style="border-color:rgba(167,139,250,.2);">
+      <div class="parlay-header">
+        <div>
+          <div class="parlay-title">4-Leg Parlay</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Higher Upside · More Variance</div>
+        </div>
+        <div class="parlay-odds" style="color:#a78bfa;">~+1280</div>
+      </div>
+      <div class="parlay-legs">
+        <div class="parlay-leg">
+          <div class="parlay-leg-num">01</div>
+          <div class="parlay-leg-info">
+            <div class="parlay-leg-pitcher">Chase Burns · K Over 6.5</div>
+            <div class="parlay-leg-detail">CIN vs KC · Score: 86</div>
+          </div>
+          <div class="parlay-leg-odds">est. -130</div>
+        </div>
+        <div class="parlay-leg">
+          <div class="parlay-leg-num">02</div>
+          <div class="parlay-leg-info">
+            <div class="parlay-leg-pitcher">Joe Ryan · K Over 6.5</div>
+            <div class="parlay-leg-detail">MIN vs CWS · Score: 78</div>
+          </div>
+          <div class="parlay-leg-odds">est. -120</div>
+        </div>
+        <div class="parlay-leg">
+          <div class="parlay-leg-num">03</div>
+          <div class="parlay-leg-info">
+            <div class="parlay-leg-pitcher">Landen Roupp · K Over 5.5</div>
+            <div class="parlay-leg-detail">SF vs MIL · Score: 68</div>
+          </div>
+          <div class="parlay-leg-odds">est. -115</div>
+        </div>
+        <div class="parlay-leg">
+          <div class="parlay-leg-num">04</div>
+          <div class="parlay-leg-info">
+            <div class="parlay-leg-pitcher">Sandy Alcantara · Outs Under 15.5</div>
+            <div class="parlay-leg-detail">MIA vs WSH · Score: 65</div>
+          </div>
+          <div class="parlay-leg-odds">est. -110</div>
+        </div>
+      </div>
+      <div class="parlay-risk">
+        <div class="risk-dot risk-high"></div>
+        <span><strong style="color:var(--text);">High risk.</strong> Alcantara has been lit up his last two starts (14 ER / 11.2 IP). Under at 15.5 is viable but volatile. Adds upside, increases miss potential.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- K OVER PICKS -->
+  <div class="section-header">
+    <h2>Strikeout Over Plays</h2>
+    <div class="section-line"></div>
+    <div class="section-count">2 plays</div>
+  </div>
+
+  <div class="picks-grid">
+
+    <!-- BURNS -->
+    <div class="pick-card grade-a-card">
+      <div class="pick-card-header">
+        <div>
+          <div class="pick-pitcher-name">Chase Burns</div>
+          <div class="pick-matchup">CIN vs KC · 7:10 PM · Great American Ball Park</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">RHP · Age 23 · 1.96 ERA · 0.96 WHIP</div>
+          <div class="last5" title="Last 5 starts vs K prop">
+            <div class="l5-dot l5-w">W</div>
+            <div class="l5-dot l5-w">W</div>
+            <div class="l5-dot l5-w">W</div>
+            <div class="l5-dot l5-l">L</div>
+            <div class="l5-dot l5-w">W</div>
+          </div>
+        </div>
+        <div class="pick-grade-badge grade-a">A</div>
+      </div>
+      <div class="pick-stats-row">
+        <div class="pick-stat"><span class="val">6.5</span><span class="lbl">Est. Line</span></div>
+        <div class="pick-stat"><span class="val green">8.1</span><span class="lbl">Projection</span></div>
+        <div class="pick-stat"><span class="val" style="color:var(--text-muted);">10.1</span><span class="lbl">K/9</span></div>
+        <div class="pick-stat"><span class="val green">86</span><span class="lbl">Score</span></div>
+      </div>
+      <div class="pick-confidence-bar">
+        <div class="pick-confidence-fill fill-a" style="width:86%;"></div>
+      </div>
+      <div class="pick-reasoning">
+        72 Ks in 64.1 IP (10.1 K/9). 8 Ks last start vs NYM. 5 of last 7 starts over 7 Ks. KC's Avila transitions from bullpen — favorable lineup sequencing. Elite slider at 43.7% whiff rate. No workload flags.
+      </div>
+      <div class="pick-footer">
+        <div class="pick-badges">
+          <span class="badge badge-k-over">K Over</span>
+          <span class="badge badge-pod">★ POD</span>
+          <span class="badge badge-parlay">Parlay Leg</span>
+          <span class="badge badge-pending">Pending</span>
+        </div>
+        <div class="pick-score">86/100</div>
+      </div>
+    </div>
+
+    <!-- JOE RYAN -->
+    <div class="pick-card">
+      <div class="pick-card-header">
+        <div>
+          <div class="pick-pitcher-name">Joe Ryan</div>
+          <div class="pick-matchup">MIN vs CWS · 7:40 PM · Target Field</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">RHP · Age 29 · 3.02 ERA · 0.97 WHIP</div>
+          <div class="last5" title="Last 3 starts K'd 7+ each">
+            <div class="l5-dot l5-w">W</div>
+            <div class="l5-dot l5-w">W</div>
+            <div class="l5-dot l5-w">W</div>
+            <div class="l5-dot l5-l">L</div>
+            <div class="l5-dot l5-w">W</div>
+          </div>
+        </div>
+        <div class="pick-grade-badge grade-b">B</div>
+      </div>
+      <div class="pick-stats-row">
+        <div class="pick-stat"><span class="val">6.5</span><span class="lbl">Est. Line</span></div>
+        <div class="pick-stat"><span class="val green">7.6</span><span class="lbl">Projection</span></div>
+        <div class="pick-stat"><span class="val" style="color:var(--text-muted);">9.7</span><span class="lbl">K/9</span></div>
+        <div class="pick-stat"><span class="val blue">78</span><span class="lbl">Score</span></div>
+      </div>
+      <div class="pick-confidence-bar">
+        <div class="pick-confidence-fill fill-b" style="width:78%;"></div>
+      </div>
+      <div class="pick-reasoning">
+        7+ Ks in each of last 3 starts including 9 vs CWS most recently. 61 Ks in 56.2 IP on the season. CWS lineup is one of the weakest in the AL — heavy strikeout profile. 4 consecutive quality starts. Season high of 9 Ks twice.
+      </div>
+      <div class="pick-footer">
+        <div class="pick-badges">
+          <span class="badge badge-k-over">K Over</span>
+          <span class="badge badge-parlay">Parlay Leg</span>
+          <span class="badge badge-pending">Pending</span>
+        </div>
+        <div class="pick-score">78/100</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- OUTS PICKS -->
+  <div class="section-header">
+    <h2>Outs Recorded Plays</h2>
+    <div class="section-line"></div>
+    <div class="section-count">1 play</div>
+  </div>
+
+  <div class="picks-grid">
+
+    <!-- ALCANTARA UNDER -->
+    <div class="pick-card">
+      <div class="pick-card-header">
+        <div>
+          <div class="pick-pitcher-name">Sandy Alcantara</div>
+          <div class="pick-matchup">MIA vs WSH · 6:45 PM · loanDepot Park</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">RHP · 2026 · Recent Form: 14 ER / 11.2 IP (last 2 starts)</div>
+          <div class="last5" title="Last 5 starts outs vs line">
+            <div class="l5-dot l5-w">W</div>
+            <div class="l5-dot l5-l">L</div>
+            <div class="l5-dot l5-l">L</div>
+            <div class="l5-dot l5-l">L</div>
+            <div class="l5-dot l5-l">L</div>
+          </div>
+        </div>
+        <div class="pick-grade-badge grade-c">C</div>
+      </div>
+      <div class="pick-stats-row">
+        <div class="pick-stat"><span class="val">15.5</span><span class="lbl">Est. Line</span></div>
+        <div class="pick-stat"><span class="val green">13.2</span><span class="lbl">Projection</span></div>
+        <div class="pick-stat"><span class="val" style="color:var(--red);">14 ER</span><span class="lbl">Last 2 Starts</span></div>
+        <div class="pick-stat"><span class="val" style="color:var(--yellow);">65</span><span class="lbl">Score</span></div>
+      </div>
+      <div class="pick-confidence-bar">
+        <div class="pick-confidence-fill fill-c" style="width:65%;"></div>
+      </div>
+      <div class="pick-reasoning">
+        Alcantara has allowed 14 ER on 19 H including 5 HR in last 11.2 IP — that is a pitcher on a short leash. Miami's bullpen has been used heavily. Washington OBP and patience rank middle of pack so it's not a slam dunk, but the form spiral + HR rate suggests early exit risk. Grade C — playable but not high confidence.
+      </div>
+      <div class="pick-footer">
+        <div class="pick-badges">
+          <span class="badge badge-outs-under">Outs Under</span>
+          <span class="badge badge-parlay">Parlay Leg</span>
+          <span class="badge badge-pending">Pending</span>
+        </div>
+        <div class="pick-score">65/100</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- WATCHLIST -->
+  <div class="section-header">
+    <h2>Watchlist — Confirm Line Before Playing</h2>
+    <div class="section-line"></div>
+    <div class="section-count">2 pitchers</div>
+  </div>
+
+  <div class="picks-grid">
+
+    <!-- ROUPP -->
+    <div class="pick-card" style="border-color:rgba(255,214,0,.15);">
+      <div class="pick-card-header">
+        <div>
+          <div class="pick-pitcher-name">Landen Roupp</div>
+          <div class="pick-matchup">SF vs MIL · 7:40 PM · American Family Field</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">RHP · 7+ Ks in 6 of 11 starts</div>
+        </div>
+        <div class="pick-grade-badge grade-c">C</div>
+      </div>
+      <div class="pick-stats-row">
+        <div class="pick-stat"><span class="val">5.5</span><span class="lbl">Est. Line</span></div>
+        <div class="pick-stat"><span class="val green">6.8</span><span class="lbl">Projection</span></div>
+        <div class="pick-stat"><span class="val" style="color:var(--text-muted);">8.9</span><span class="lbl">K/9</span></div>
+        <div class="pick-stat"><span class="val" style="color:var(--yellow);">68</span><span class="lbl">Score</span></div>
+      </div>
+      <div class="pick-confidence-bar">
+        <div class="pick-confidence-fill fill-c" style="width:68%;"></div>
+      </div>
+      <div class="pick-reasoning">
+        Solid K rate and strong half-season. MIL using Drohan as opener could mean a mix of lineups, reducing Roupp's K opportunities against the top of the order. Playable if line comes in at 5.5 or under. Confirm before betting.
+      </div>
+      <div class="pick-footer">
+        <div class="pick-badges">
+          <span class="badge badge-k-over">K Over</span>
+          <span class="badge badge-watch">⚡ Confirm Line</span>
+        </div>
+        <div class="pick-score">68/100</div>
+      </div>
+    </div>
+
+    <!-- DEGROM -->
+    <div class="pick-card" style="border-color:rgba(255,214,0,.15);">
+      <div class="pick-card-header">
+        <div>
+          <div class="pick-pitcher-name">Jacob deGrom</div>
+          <div class="pick-matchup">TEX vs STL · 7:45 PM · Globe Life Field</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">RHP · 5.72 ERA in May · 9 HR allowed in May</div>
+        </div>
+        <div class="pick-grade-badge grade-c">C</div>
+      </div>
+      <div class="pick-stats-row">
+        <div class="pick-stat"><span class="val">5.5</span><span class="lbl">Est. Line</span></div>
+        <div class="pick-stat"><span class="val" style="color:var(--text-muted);">5.8</span><span class="lbl">Projection</span></div>
+        <div class="pick-stat"><span class="val" style="color:var(--red);">5.72</span><span class="lbl">May ERA</span></div>
+        <div class="pick-stat"><span class="val" style="color:var(--yellow);">61</span><span class="lbl">Score</span></div>
+      </div>
+      <div class="pick-confidence-bar">
+        <div class="pick-confidence-fill fill-c" style="width:61%;"></div>
+      </div>
+      <div class="pick-reasoning">
+        deGrom's underlying stuff can still produce Ks but May was brutal — 9 HR in the month suggest command issues and potential early exits. STL's McGreevey has crazy splits (2.98 ERA / 5.63 xERA) so game environment is unpredictable. Below confidence threshold — lean Pass unless line drops to 4.5.
+      </div>
+      <div class="pick-footer">
+        <div class="pick-badges">
+          <span class="badge badge-k-over">K Over</span>
+          <span class="badge badge-watch">⚡ Borderline</span>
+        </div>
+        <div class="pick-score">61/100</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PASS -->
+  <div class="section-header">
+    <h2>Pass — No Edge</h2>
+    <div class="section-line"></div>
+    <div class="section-count">4 pitchers</div>
+  </div>
+
+  <div class="avoid-row">
+    <div class="pitcher">Ty Madden</div>
+    <div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">DET vs TB · 6:40 PM</div>
+    <div class="reason">IL return from forearm issue. Pitch count cap likely. Unplayable until workload pattern establishes.</div>
+    <span class="badge badge-pass">Pass</span>
+  </div>
+  <div class="avoid-row">
+    <div class="pitcher">Griffin Jax</div>
+    <div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">TB vs DET · 6:40 PM</div>
+    <div class="reason">7.3 K/9 is below threshold for K Over value. Outs props unclear given Tampa's typical bullpen usage patterns.</div>
+    <span class="badge badge-pass">Pass</span>
+  </div>
+  <div class="avoid-row">
+    <div class="pitcher">Shane Drohan</div>
+    <div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">MIL vs SF · 7:40 PM</div>
+    <div class="reason">Extended opener — no reliable IP ceiling. Both K and Outs props unplayable.</div>
+    <span class="badge badge-pass">Pass</span>
+  </div>
+  <div class="avoid-row">
+    <div class="pitcher">Kyle Freeland</div>
+    <div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">COL vs LAA · 9:38 PM</div>
+    <div class="reason">Coors K suppressor + 6+ ER in 4 of last 5 starts. Unplayable in either direction at standard lines.</div>
+    <span class="badge badge-pass">Pass</span>
+  </div>
+
+</main>
+
+<div class="watermark">PitchEdge · Research Tool · Not Financial Advice</div>
+
+<script>
+  // Animate confidence bars
+  const fills = document.querySelectorAll('.pick-confidence-fill');
+  const widths = [];
+  fills.forEach(f => { widths.push(f.style.width); f.style.width = '0%'; });
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      fills.forEach((f, i) => { f.style.width = widths[i]; });
+    }, 300);
+  });
+</script>
+</body>
+</html>
