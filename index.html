@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PitchEdge — MLB Pitcher Props · June 8, 2026</title>
+<title>PitchEdge — MLB Pitcher Props · June 9, 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0a0d11;--surface:#111520;--surface2:#171d2b;--border:#1e2840;--border-bright:#2a3550;--text:#e8ecf5;--text-muted:#6b7898;--text-dim:#3d4f6e;--green:#00e676;--green-dim:rgba(0,230,118,0.08);--green-mid:rgba(0,230,118,0.15);--red:#ff3d5a;--red-dim:rgba(255,61,90,0.08);--yellow:#ffd600;--yellow-dim:rgba(255,214,0,0.08);--blue:#4d9fff;--pod:#ffd600;--pod-dim:rgba(255,214,0,0.10);}
+  :root{--bg:#0a0d11;--surface:#111520;--surface2:#171d2b;--border:#1e2840;--text:#e8ecf5;--text-muted:#6b7898;--text-dim:#3d4f6e;--green:#00e676;--green-mid:rgba(0,230,118,0.15);--red:#ff3d5a;--red-dim:rgba(255,61,90,0.08);--yellow:#ffd600;--yellow-dim:rgba(255,214,0,0.08);--blue:#4d9fff;--pod:#ffd600;--pod-dim:rgba(255,214,0,0.10);}
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
   nav{position:sticky;top:0;z-index:100;background:rgba(10,13,17,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;}
@@ -30,17 +30,14 @@
   .result-cell .val{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;display:block;line-height:1;}
   .result-cell .lbl{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-top:5px;display:block;}
   .result-cell.green .val{color:var(--green);}.result-cell.red .val{color:var(--red);}.result-cell.yellow .val{color:var(--yellow);}.result-cell.blue .val{color:var(--blue);}
-  /* STRATEGY EXPLAINER */
   .strategy-box{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
   .strat-card{border-radius:10px;padding:16px;}
   .strat-card.straight{background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.2);}
-  .strat-card.parlay{background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);}
-  .strat-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+  .strat-card.parlay-s{background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);}
+  .strat-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
   .strat-card.straight .strat-title{color:var(--green);}
-  .strat-card.parlay .strat-title{color:#a78bfa;}
+  .strat-card.parlay-s .strat-title{color:#a78bfa;}
   .strat-body{font-size:12px;color:var(--text-muted);line-height:1.6;}
-  .strat-body strong{color:var(--text);}
-  /* POD */
   .pod-card{background:linear-gradient(135deg,rgba(255,214,0,.06) 0%,var(--surface) 60%);border:1px solid rgba(255,214,0,.25);border-radius:16px;padding:24px 28px;position:relative;overflow:hidden;margin-top:8px;}
   .pod-card::before{content:'';position:absolute;top:0;right:0;width:160px;height:160px;background:radial-gradient(ellipse at top right,rgba(255,214,0,.08),transparent 70%);pointer-events:none;}
   .pod-label{display:inline-flex;align-items:center;gap:6px;background:var(--pod-dim);border:1px solid rgba(255,214,0,.3);color:var(--pod);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-bottom:14px;}
@@ -67,7 +64,6 @@
   .badge-pass{background:rgba(107,120,152,.12);color:var(--text-muted);border:1px solid var(--border);}
   .grade-a{background:rgba(0,230,118,.15);color:var(--green);border:1px solid rgba(0,230,118,.3);}
   .grade-b{background:rgba(77,159,255,.15);color:var(--blue);border:1px solid rgba(77,159,255,.3);}
-  /* PICK CARDS */
   .picks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
   .pick-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;animation:fadeIn .4s ease both;}
   .pick-card.straight-card{border-color:rgba(0,230,118,.2);}
@@ -75,27 +71,26 @@
   .pick-card.result-win{border-color:rgba(0,230,118,.5);background:linear-gradient(135deg,rgba(0,230,118,.04),var(--surface));}
   .pick-card.result-loss{border-color:rgba(255,61,90,.4);background:linear-gradient(135deg,rgba(255,61,90,.04),var(--surface));}
   .pick-card.result-push{border-color:rgba(255,214,0,.3);background:linear-gradient(135deg,rgba(255,214,0,.04),var(--surface));}
-  .pick-card:nth-child(1){animation-delay:.05s}.pick-card:nth-child(2){animation-delay:.10s}.pick-card:nth-child(3){animation-delay:.15s}.pick-card:nth-child(4){animation-delay:.20s}.pick-card:nth-child(5){animation-delay:.25s}
+  .pick-card:nth-child(1){animation-delay:.05s}.pick-card:nth-child(2){animation-delay:.10s}.pick-card:nth-child(3){animation-delay:.15s}.pick-card:nth-child(4){animation-delay:.20s}
   .pick-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
   .pick-pitcher-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;line-height:1;color:var(--text);}
   .pick-matchup{font-size:12px;color:var(--text-muted);margin-top:3px;}
   .pick-sub{font-size:11px;color:var(--text-dim);margin-top:2px;}
   .pick-grade-badge{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;flex-shrink:0;}
-  /* PROBABILITY BAR */
-  .prob-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .prob-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
   .prob-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);flex:0 0 80px;}
   .prob-bar-bg{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
   .prob-bar-fill{height:100%;border-radius:4px;}
-  .prob-bar-fill.high{background:var(--green);}
-  .prob-bar-fill.mid{background:var(--yellow);}
-  .prob-bar-fill.low{background:var(--red);}
+  .prob-bar-fill.high{background:var(--green);}.prob-bar-fill.mid{background:var(--yellow);}.prob-bar-fill.low{background:var(--red);}
   .prob-pct{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;flex:0 0 40px;text-align:right;}
   .prob-pct.high{color:var(--green);}.prob-pct.mid{color:var(--yellow);}.prob-pct.low{color:var(--red);}
   .key-reason{border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--text-muted);line-height:1.5;}
-  .key-reason.under-r{background:rgba(255,61,90,0.06);border:1px solid rgba(255,61,90,0.2);}
-  .key-reason.under-r strong{color:var(--red);}
-  .key-reason.over-r{background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);}
-  .key-reason.over-r strong{color:var(--green);}
+  .under-r{background:rgba(255,61,90,0.06);border:1px solid rgba(255,61,90,0.2);}
+  .under-r strong{color:var(--red);}
+  .over-r{background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);}
+  .over-r strong{color:var(--green);}
+  .k-r{background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);}
+  .k-r strong{color:var(--green);}
   .pick-stats-row{display:flex;margin-bottom:12px;background:var(--surface2);border-radius:8px;overflow:hidden;}
   .pick-stat{flex:1;padding:9px 8px;text-align:center;border-right:1px solid var(--border);}
   .pick-stat:last-child{border-right:none;}
@@ -118,7 +113,6 @@
   .result-btn.btn-push{border-color:rgba(255,214,0,.3);color:var(--yellow);}
   .result-btn.btn-push.active{background:rgba(255,214,0,.12);border-color:var(--yellow);}
   .result-btn.btn-clear{border-color:var(--border);color:var(--text-dim);font-size:11px;}
-  /* PARLAY BUILDS */
   .parlay-build{background:var(--surface);border:1px solid rgba(167,139,250,.25);border-radius:12px;padding:20px;margin-bottom:16px;}
   .parlay-build-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
   .parlay-build-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--text);}
@@ -134,12 +128,14 @@
   .parlay-leg-odds{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;}
   .parlay-leg-odds.fav{color:var(--text-muted);}.parlay-leg-odds.plus{color:var(--green);}
   .parlay-leg-prob{font-size:10px;color:var(--text-dim);margin-top:2px;}
-  .parlay-math{display:flex;gap:20px;padding:12px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:12px;}
+  .parlay-math{display:flex;gap:16px;padding:12px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:12px;}
   .parlay-math-item{text-align:center;flex:1;}
-  .parlay-math-item .val{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;display:block;}
+  .parlay-math-item .val{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;display:block;}
   .parlay-math-item .lbl{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);font-weight:600;margin-top:3px;display:block;}
   .parlay-note{font-size:12px;color:var(--text-muted);line-height:1.5;}
-  /* FULL TABLE */
+  .avoid-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;flex-wrap:wrap;}
+  .avoid-row .pitcher{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;flex:1;min-width:120px;}
+  .avoid-row .reason{font-size:12px;color:var(--text-muted);flex:2;}
   .lines-table{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
   .lines-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr;padding:9px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
   .lines-header div{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);text-align:center;}
@@ -152,38 +148,33 @@
   .ln.g{color:var(--green);}.ln.r{color:var(--red);}.ln.y{color:var(--yellow);}.ln.d{color:var(--text-dim);}
   .pc{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--text);}
   .pc .tm{font-size:11px;color:var(--text-dim);font-weight:400;display:block;}
-  .avoid-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;flex-wrap:wrap;}
-  .avoid-row .pitcher{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;flex:1;min-width:120px;}
-  .avoid-row .reason{font-size:12px;color:var(--text-muted);flex:2;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-  .watermark{position:fixed;bottom:16px;right:16px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);opacity:.4;pointer-events:none;}
   @media(max-width:768px){.picks-grid{grid-template-columns:1fr}.results-strip{grid-template-columns:repeat(3,1fr)}.pod-main{flex-direction:column}.strategy-box{grid-template-columns:1fr}main{padding:20px 16px}.lines-header,.lines-row{grid-template-columns:2fr 1fr 1fr 1fr 1fr}}
 </style>
 </head>
 <body>
 <nav>
   <div class="nav-logo"><div class="nav-dot"></div>PITCH<span>EDGE</span></div>
-  <div class="nav-date">Mon · Jun 8, 2026 · 8 Games</div>
+  <div class="nav-date">Tue · Jun 9, 2026 · 13 Games</div>
 </nav>
 
 <main>
   <div class="page-header">
     <div>
-      <h1>June 8 <em>Pitcher Props</em></h1>
-      <div style="font-size:13px;color:var(--text-muted);margin-top:5px;">Straight bets hunt plus money · Parlays built on probability · Lines from DraftKings</div>
+      <h1>June 9 <em>Pitcher Props</em></h1>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:5px;">Straight bets: hunt value · Parlays: stack probability · Lines from DraftKings</div>
     </div>
   </div>
 
-  <!-- STRATEGY EXPLAINER -->
   <div class="strategy-box">
     <div class="strat-card straight">
       <div class="strat-title">Straight Bets — Hunt Value</div>
-      <div class="strat-body"><strong>Goal: find plus money on high-probability outcomes.</strong> A +128 line that hits 55% of the time is pure edge. These picks are evaluated on whether the price is wrong relative to actual probability. You only need to be right a little more than break-even to profit long term.</div>
+      <div class="strat-body">Find plays where our probability estimate beats the break-even. Plus money on a 55%+ outcome = edge. Each card shows estimated probability vs break-even required.</div>
     </div>
-    <div class="strat-card parlay">
+    <div class="strat-card parlay-s">
       <div class="strat-title">Parlays — Stack Probability</div>
-      <div class="strat-body"><strong>Goal: combine high-probability legs, not high-payout legs.</strong> Three -150 legs in a parlay hits ~29% of the time and pays ~+275. Three +110 legs hits ~12% and pays ~+750. The first is far better EV if each leg is genuinely 60% likely. Parlay legs are chosen for probability to hit, not odds appeal.</div>
+      <div class="strat-body">Combine high-probability legs regardless of odds. Three -130 legs that each hit 57% of the time produces better EV than three +120 legs that each hit 48%. The math wins over time.</div>
     </div>
   </div>
 
@@ -200,92 +191,138 @@
   <!-- POD -->
   <div class="section-header"><h2>Play of the Day — Straight Bet</h2><div class="section-line"></div></div>
   <div class="pod-card">
-    <div class="pod-label">Play of the Day · Straight Bet</div>
+    <div class="pod-label">Play of the Day · Best Value</div>
     <div class="pod-main">
       <div>
-        <div class="pod-pitcher">Patrick Corbin</div>
-        <div class="pod-matchup">PHI @ TOR · Rogers Centre · road start</div>
+        <div class="pod-pitcher">Payton Tolle</div>
+        <div class="pod-matchup">BOS @ TB · 3:40 PM · Tropicana Field</div>
         <div class="pod-badges" style="margin-top:10px;">
-          <span class="badge badge-outs-under">Outs Under 15.5 (+128)</span>
+          <span class="badge badge-outs-over">Outs Over 17.5 (+101)</span>
           <span class="badge badge-pod">★ POD</span>
           <span class="badge grade-a">A</span>
         </div>
       </div>
       <div class="pod-stats">
-        <div class="pod-stat"><span class="val" style="color:var(--text-muted);font-size:11px;">LINE</span><span class="val" style="font-size:22px;color:var(--text);margin-top:4px;">15.5</span><span class="lbl">Outs Under</span></div>
-        <div class="pod-stat green"><span class="val" style="color:var(--text-muted);font-size:11px;">ODDS</span><span class="val" style="font-size:22px;margin-top:4px;">+128</span><span class="lbl">Straight Bet</span></div>
-        <div class="pod-stat pod"><span class="val" style="color:var(--text-muted);font-size:11px;">PROB EST</span><span class="val" style="font-size:22px;margin-top:4px;">~53%</span><span class="lbl">Hit Probability</span></div>
+        <div class="pod-stat"><span class="val" style="color:var(--text-muted);font-size:11px;">LINE</span><span class="val" style="font-size:22px;color:var(--text);margin-top:4px;">17.5</span><span class="lbl">Outs Over</span></div>
+        <div class="pod-stat green"><span class="val" style="color:var(--text-muted);font-size:11px;">ODDS</span><span class="val" style="font-size:22px;margin-top:4px;">+101</span><span class="lbl">Over Odds</span></div>
+        <div class="pod-stat pod"><span class="val" style="color:var(--text-muted);font-size:11px;">PROB EST</span><span class="val" style="font-size:22px;margin-top:4px;">~62%</span><span class="lbl">Hit Probability</span></div>
         <div class="pod-grade">A</div>
       </div>
     </div>
     <div class="pod-reasoning">
-      <strong>Why this is the POD as a straight bet:</strong> Break-even on +128 is 43.8%. Our probability estimate is ~53% — that's a 9-point edge. Corbin has gone under 5.2 IP (the line equivalent) in roughly half his starts this season. His June 3 start was exactly 5.0 IP. PHI is a patient lineup that works counts. The book is pricing him at 43.8% to exit early — we think it's more like 53%. That gap is where the value lives.
+      <strong>Why this is the POD:</strong> The break-even on +101 is 49.8% — barely above a coin flip. Our probability estimate is ~62%. That's a +12 point edge, which is exceptional. Tolle has posted a 2.28 ERA with 51 strikeouts in 47.1 innings across 8 starts — going 6+ IP consistently. His most recent start was 6 scoreless innings vs BAL on 99 pitches. The book is essentially offering even money on a pitcher who goes deep in 75%+ of his starts. TB is a patient lineup but Tolle's 28.6% K rate and low walk rate mean he's efficient enough to work through patient lineups. This is plus money on what should be a -130 to -140 line. Take it.
     </div>
   </div>
 
   <!-- STRAIGHT BET PICKS -->
   <div class="section-header"><h2>Straight Bet Picks</h2><div class="section-line"></div></div>
-  <div class="section-sub"><strong>These picks are evaluated on value vs probability.</strong> Plus money = book prices it below 50% likely. We only play when our probability estimate exceeds the break-even. Each card shows estimated hit probability vs break-even required.</div>
+  <div class="section-sub"><strong>Evaluated on probability vs break-even edge.</strong> Each pick only qualifies if our estimated probability meaningfully exceeds the break-even required by the odds.</div>
   <div class="picks-grid">
 
-    <!-- CORBIN UNDER — value straight bet -->
-    <div class="pick-card straight-card" id="card-corbin">
+    <!-- TOLLE OUTS OVER — massive edge at +101 -->
+    <div class="pick-card straight-card" id="card-tolle">
       <div class="pick-card-header">
         <div>
-          <div class="pick-pitcher-name">Patrick Corbin</div>
-          <div class="pick-matchup">PHI @ TOR · Rogers Centre · road</div>
-          <div class="pick-sub">LHP · TOR · 3.86 ERA · June 3 start = 5.0 IP · PHI patient lineup</div>
-          <div class="last5"><div class="l5-dot l5-w">W</div><div class="l5-dot l5-l">L</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-l">L</div><div class="l5-dot l5-l">L</div></div>
+          <div class="pick-pitcher-name">Payton Tolle</div>
+          <div class="pick-matchup">BOS @ TB · 3:40 PM · Tropicana Field</div>
+          <div class="pick-sub">LHP · BOS road · 2.28 ERA · 0.97 WHIP · 51 Ks/47.1 IP · last start 6.0 IP</div>
+          <div class="last5"><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-l">L</div><div class="l5-dot l5-w">W</div></div>
         </div>
         <div class="pick-grade-badge grade-a">A</div>
       </div>
-      <div class="key-reason under-r"><strong>Under logic:</strong> 5 of last 11 starts under 5.2 IP. PHI works counts, runs up pitch totals. Road LHP vs patient lineup = early hook risk. Plus money means book agrees this is below 50/50.</div>
+      <div class="key-reason over-r"><strong>Over edge:</strong> Tolle has gone 6+ IP in the majority of his 8 starts this season. Last start was 6 scoreless innings on 99 pitches vs BAL. The book is offering even money (+101) on a pitcher who goes deep consistently. Break-even is 49.8%. This is a mispriced line.</div>
       <div class="prob-row">
         <div class="prob-label">Our Est.</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:53%;"></div></div>
-        <div class="prob-pct high">53%</div>
+        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:62%;"></div></div>
+        <div class="prob-pct high">62%</div>
       </div>
       <div class="prob-row">
         <div class="prob-label">Break-Even</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:43.8%;"></div></div>
-        <div class="prob-pct mid">43.8%</div>
+        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:49.8%;"></div></div>
+        <div class="prob-pct mid">49.8%</div>
       </div>
       <div class="pick-stats-row">
-        <div class="pick-stat"><span class="val">15.5</span><span class="lbl">Outs Line</span></div>
-        <div class="pick-stat"><span class="val red">+128</span><span class="lbl">Under Odds</span></div>
-        <div class="pick-stat"><span class="val green">+9.2%</span><span class="lbl">Edge</span></div>
-        <div class="pick-stat"><span class="val green">84</span><span class="lbl">Score</span></div>
+        <div class="pick-stat"><span class="val">17.5</span><span class="lbl">Outs Line</span></div>
+        <div class="pick-stat"><span class="val green">+101</span><span class="lbl">Over Odds</span></div>
+        <div class="pick-stat"><span class="val green">+12.2%</span><span class="lbl">Edge</span></div>
+        <div class="pick-stat"><span class="val green">88</span><span class="lbl">Score</span></div>
       </div>
-      <div class="pick-reasoning">Strong value straight bet. +9.2 point edge over break-even. Play this standalone, not just in parlays.</div>
+      <div class="pick-reasoning">Best value on the slate. +12.2 point edge over break-even. Book is pricing Tolle like he's a 50/50 shot to go 6 IP — he's not. Strong standalone AND parlay leg.</div>
       <div class="pick-footer">
         <div class="pick-badges">
-          <span class="badge badge-outs-under">Outs Under 15.5</span>
+          <span class="badge badge-outs-over">Outs Over 17.5</span>
           <span class="badge badge-straight">★ Straight Bet</span>
           <span class="badge badge-pod">POD</span>
-          <span id="status-corbin" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
+          <span id="status-tolle" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
         </div>
-        <div class="pick-score">84/100</div>
+        <div class="pick-score">88/100</div>
       </div>
       <div class="result-buttons">
-        <button class="result-btn btn-win" onclick="setResult('corbin','win')">✓ Win</button>
-        <button class="result-btn btn-loss" onclick="setResult('corbin','loss')">✗ Loss</button>
-        <button class="result-btn btn-push" onclick="setResult('corbin','push')">— Push</button>
-        <button class="result-btn btn-clear" onclick="setResult('corbin','pending')">Clear</button>
+        <button class="result-btn btn-win" onclick="setResult('tolle','win')">✓ Win</button>
+        <button class="result-btn btn-loss" onclick="setResult('tolle','loss')">✗ Loss</button>
+        <button class="result-btn btn-push" onclick="setResult('tolle','push')">— Push</button>
+        <button class="result-btn btn-clear" onclick="setResult('tolle','pending')">Clear</button>
       </div>
     </div>
 
-    <!-- SANCHEZ K OVER — value straight bet -->
-    <div class="pick-card straight-card" id="card-sanchez">
+    <!-- SKENES K OVER — probability play -->
+    <div class="pick-card straight-card" id="card-skenes">
       <div class="pick-card-header">
         <div>
-          <div class="pick-pitcher-name">Cristopher Sanchez</div>
-          <div class="pick-matchup">PHI @ TOR (P Corbin) · Rogers Centre</div>
-          <div class="pick-sub">LHP · PHI · 1.47 ERA · 95 Ks/79.1 IP · 10.8 K/9 · historic streak</div>
+          <div class="pick-pitcher-name">Paul Skenes</div>
+          <div class="pick-matchup">LAD @ PIT · 3:40 PM · PNC Park</div>
+          <div class="pick-sub">RHP · PIT home · 2026 NL Cy Young favorite · 9.86 K/9 · last start 8 IP 10 Ks</div>
           <div class="last5"><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div></div>
         </div>
         <div class="pick-grade-badge grade-a">A</div>
       </div>
-      <div class="key-reason over-r"><strong>K Over logic:</strong> Sanchez averages 10.8 K/9. The 6.5 line requires only 6.6 Ks per 9 IP — well below his average. TOR is a mid-tier K lineup. +109 means break-even is 47.8%. We estimate ~57% probability. That's a 9-point edge.</div>
+      <div class="key-reason k-r"><strong>K Over edge:</strong> Skenes is averaging 9.86 K/9 with a 1.50 BB/9 in 2026. His last start was 8 shutout innings with 10 strikeouts. The 6.5 K line requires only 6.6 Ks per 9 IP — well below his season average. Break-even at -110 is 52.4%. Our estimate: ~68%.</div>
+      <div class="prob-row">
+        <div class="prob-label">Our Est.</div>
+        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:68%;"></div></div>
+        <div class="prob-pct high">68%</div>
+      </div>
+      <div class="prob-row">
+        <div class="prob-label">Break-Even</div>
+        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:52.4%;"></div></div>
+        <div class="prob-pct mid">52.4%</div>
+      </div>
+      <div class="pick-stats-row">
+        <div class="pick-stat"><span class="val">6.5</span><span class="lbl">K Line</span></div>
+        <div class="pick-stat"><span class="val yellow">-110</span><span class="lbl">K Over</span></div>
+        <div class="pick-stat"><span class="val green">+15.6%</span><span class="lbl">Edge</span></div>
+        <div class="pick-stat"><span class="val green">86</span><span class="lbl">Score</span></div>
+      </div>
+      <div class="pick-reasoning">Largest probability edge on the slate at +15.6 points over break-even. Skenes clears 6.5 Ks in roughly 70% of his starts based on 2026 form. LAD is a mid-K offense — neutral matchup — but Skenes is so dominant it doesn't matter. Strong standalone and parlay leg.
+      </div>
+      <div class="pick-footer">
+        <div class="pick-badges">
+          <span class="badge badge-k-over">K Over 6.5</span>
+          <span class="badge badge-straight">★ Straight Bet</span>
+          <span id="status-skenes" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
+        </div>
+        <div class="pick-score">86/100</div>
+      </div>
+      <div class="result-buttons">
+        <button class="result-btn btn-win" onclick="setResult('skenes','win')">✓ Win</button>
+        <button class="result-btn btn-loss" onclick="setResult('skenes','loss')">✗ Loss</button>
+        <button class="result-btn btn-push" onclick="setResult('skenes','push')">— Push</button>
+        <button class="result-btn btn-clear" onclick="setResult('skenes','pending')">Clear</button>
+      </div>
+    </div>
+
+    <!-- WHEELER OUTS OVER — plus money on a deep-outing pitcher -->
+    <div class="pick-card straight-card" id="card-wheeler">
+      <div class="pick-card-header">
+        <div>
+          <div class="pick-pitcher-name">Zack Wheeler</div>
+          <div class="pick-matchup">PHI @ TOR (D Cease) · 4:07 PM · Rogers Centre</div>
+          <div class="pick-sub">RHP · PHI road · 2.27 ERA · 0.85 WHIP · goes 6+ IP consistently</div>
+          <div class="last5"><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-l">L</div></div>
+        </div>
+        <div class="pick-grade-badge grade-a">A</div>
+      </div>
+      <div class="key-reason over-r"><strong>Outs Over edge:</strong> Wheeler Outs Over 18.5 at +119. Break-even is 45.7%. Wheeler averages 6.4 IP per start — that's 19.2 outs. He needs to go 6.2 IP to clear 18.5. He's cleared that in the majority of his 2026 starts. Plus money on a 57%+ probability event.</div>
       <div class="prob-row">
         <div class="prob-label">Our Est.</div>
         <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:57%;"></div></div>
@@ -293,29 +330,76 @@
       </div>
       <div class="prob-row">
         <div class="prob-label">Break-Even</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:47.8%;"></div></div>
-        <div class="prob-pct mid">47.8%</div>
+        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:45.7%;"></div></div>
+        <div class="prob-pct mid">45.7%</div>
       </div>
       <div class="pick-stats-row">
-        <div class="pick-stat"><span class="val">6.5</span><span class="lbl">K Line</span></div>
-        <div class="pick-stat"><span class="val green">+109</span><span class="lbl">K Over</span></div>
-        <div class="pick-stat"><span class="val green">+9.2%</span><span class="lbl">Edge</span></div>
-        <div class="pick-stat"><span class="val green">84</span><span class="lbl">Score</span></div>
+        <div class="pick-stat"><span class="val">18.5</span><span class="lbl">Outs Line</span></div>
+        <div class="pick-stat"><span class="val green">+119</span><span class="lbl">Over Odds</span></div>
+        <div class="pick-stat"><span class="val green">+11.3%</span><span class="lbl">Edge</span></div>
+        <div class="pick-stat"><span class="val green">82</span><span class="lbl">Score</span></div>
       </div>
-      <div class="pick-reasoning">Strong value straight bet. Sanchez's actual K rate is 65%+ to clear 6.5. The book is pricing him at 47.8%. Good standalone play.</div>
+      <div class="pick-reasoning">Strong straight bet. +11.3 edge. Wheeler's 2.27 ERA and 0.85 WHIP reflect elite command — he doesn't give walks that run up pitch counts. TOR sends Dylan Cease — a competitive game means Wheeler likely works deep. Good standalone and parlay anchor.
+      </div>
       <div class="pick-footer">
         <div class="pick-badges">
-          <span class="badge badge-k-over">K Over 6.5</span>
+          <span class="badge badge-outs-over">Outs Over 18.5</span>
           <span class="badge badge-straight">★ Straight Bet</span>
-          <span id="status-sanchez" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
+          <span id="status-wheeler" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
         </div>
-        <div class="pick-score">84/100</div>
+        <div class="pick-score">82/100</div>
       </div>
       <div class="result-buttons">
-        <button class="result-btn btn-win" onclick="setResult('sanchez','win')">✓ Win</button>
-        <button class="result-btn btn-loss" onclick="setResult('sanchez','loss')">✗ Loss</button>
-        <button class="result-btn btn-push" onclick="setResult('sanchez','push')">— Push</button>
-        <button class="result-btn btn-clear" onclick="setResult('sanchez','pending')">Clear</button>
+        <button class="result-btn btn-win" onclick="setResult('wheeler','win')">✓ Win</button>
+        <button class="result-btn btn-loss" onclick="setResult('wheeler','loss')">✗ Loss</button>
+        <button class="result-btn btn-push" onclick="setResult('wheeler','push')">— Push</button>
+        <button class="result-btn btn-clear" onclick="setResult('wheeler','pending')">Clear</button>
+      </div>
+    </div>
+
+    <!-- EOVALDI OUTS OVER — plus money deep outing -->
+    <div class="pick-card straight-card" id="card-eovaldi">
+      <div class="pick-card-header">
+        <div>
+          <div class="pick-pitcher-name">Nathan Eovaldi</div>
+          <div class="pick-matchup">TEX @ KC · 4:40 PM · Kauffman Stadium</div>
+          <div class="pick-sub">RHP · TEX road · veteran ace · Outs Over 18.5 · KC lineup mid-tier</div>
+          <div class="last5"><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-l">L</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div></div>
+        </div>
+        <div class="pick-grade-badge grade-b">B</div>
+      </div>
+      <div class="key-reason over-r"><strong>Outs Over edge:</strong> Eovaldi Outs Over 18.5 at +118. Break-even 45.8%. As a veteran workhorse, Eovaldi consistently goes 6+ IP. KC is a high-K lineup which actually helps him work efficiently — they swing early and don't drive up pitch counts with walks. Our estimate: ~56%.</div>
+      <div class="prob-row">
+        <div class="prob-label">Our Est.</div>
+        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:56%;"></div></div>
+        <div class="prob-pct high">56%</div>
+      </div>
+      <div class="prob-row">
+        <div class="prob-label">Break-Even</div>
+        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:45.8%;"></div></div>
+        <div class="prob-pct mid">45.8%</div>
+      </div>
+      <div class="pick-stats-row">
+        <div class="pick-stat"><span class="val">18.5</span><span class="lbl">Outs Line</span></div>
+        <div class="pick-stat"><span class="val green">+118</span><span class="lbl">Over Odds</span></div>
+        <div class="pick-stat"><span class="val green">+10.2%</span><span class="lbl">Edge</span></div>
+        <div class="pick-stat"><span class="val blue">76</span><span class="lbl">Score</span></div>
+      </div>
+      <div class="pick-reasoning">Good standalone play. +10.2 edge. KC high-K lineup means efficient innings for Eovaldi. Road start adds slight risk — grade B because road starters can be pulled earlier if things go sideways. Best as a parlay leg or smaller unit bet.
+      </div>
+      <div class="pick-footer">
+        <div class="pick-badges">
+          <span class="badge badge-outs-over">Outs Over 18.5</span>
+          <span class="badge badge-straight">Straight Bet</span>
+          <span id="status-eovaldi" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
+        </div>
+        <div class="pick-score">76/100</div>
+      </div>
+      <div class="result-buttons">
+        <button class="result-btn btn-win" onclick="setResult('eovaldi','win')">✓ Win</button>
+        <button class="result-btn btn-loss" onclick="setResult('eovaldi','loss')">✗ Loss</button>
+        <button class="result-btn btn-push" onclick="setResult('eovaldi','push')">— Push</button>
+        <button class="result-btn btn-clear" onclick="setResult('eovaldi','pending')">Clear</button>
       </div>
     </div>
 
@@ -323,299 +407,239 @@
 
   <!-- PARLAY BUILDS -->
   <div class="section-header"><h2>Parlay Builds — High Probability Legs</h2><div class="section-line"></div></div>
-  <div class="section-sub"><strong>Parlay legs are chosen for probability to hit, not plus-money appeal.</strong> A -150 leg that hits 60% of the time is a better parlay ingredient than a +110 leg that hits 48%. Each parlay shows the combined probability estimate and math.</div>
+  <div class="section-sub"><strong>Legs chosen for probability, not payout.</strong> The goal is combined hit rate that exceeds the parlay break-even. Each parlay shows the math explicitly.</div>
 
-  <!-- 2-LEG PARLAY -->
+  <!-- 2-LEG -->
   <div class="parlay-build">
     <div class="parlay-build-header">
       <div class="parlay-build-title">2-Leg Parlay</div>
-      <div class="parlay-build-odds">~+195</div>
+      <div class="parlay-build-odds">~+215</div>
     </div>
-    <div class="parlay-build-sub">Combined probability: ~34% · Break-even on +195: 33.9% · Slight positive edge</div>
+    <div class="parlay-build-sub">Combined probability: ~36% · Break-even on +215: 32.3% · Edge: +3.7%</div>
     <div class="parlay-legs">
       <div class="parlay-leg">
         <div class="parlay-leg-num">01</div>
         <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Connelly Early · Outs Under 17.5</div>
-          <div class="parlay-leg-detail">BOS @ TB · TB bottom-5 K rate, patient lineup runs up pitch counts · road start</div>
+          <div class="parlay-leg-pitcher">Paul Skenes · K Over 6.5</div>
+          <div class="parlay-leg-detail">LAD @ PIT · home · 9.86 K/9 · last start 10 Ks in 8 IP · ~68% probability</div>
         </div>
         <div class="parlay-leg-right">
-          <div class="parlay-leg-odds fav">-137</div>
-          <div class="parlay-leg-prob">~58% probability</div>
+          <div class="parlay-leg-odds fav">-110</div>
+          <div class="parlay-leg-prob">~68% prob</div>
         </div>
       </div>
       <div class="parlay-leg">
         <div class="parlay-leg-num">02</div>
         <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">C. Sanchez · Outs Over 20.5</div>
-          <div class="parlay-leg-detail">PHI @ TOR · Sanchez is on a 44.2 inn scoreless streak · DK set line at 20.5 — they expect him to go deep · historic form</div>
+          <div class="parlay-leg-pitcher">Zack Wheeler · Outs Over 18.5</div>
+          <div class="parlay-leg-detail">PHI @ TOR · 2.27 ERA · averages 6.4 IP · consistent deep outings · ~57% probability</div>
         </div>
         <div class="parlay-leg-right">
-          <div class="parlay-leg-odds fav">-140</div>
-          <div class="parlay-leg-prob">~58% probability</div>
+          <div class="parlay-leg-odds plus">+119</div>
+          <div class="parlay-leg-prob">~57% prob</div>
         </div>
       </div>
     </div>
     <div class="parlay-math">
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">~34%</span><span class="lbl">Hit Probability</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:var(--text);">~33.9%</span><span class="lbl">Break-Even</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">+0.1%</span><span class="lbl">Edge</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:#a78bfa;">+195</span><span class="lbl">Payout</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:var(--green);">~36%</span><span class="lbl">Hit Prob</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:var(--text);">~32.3%</span><span class="lbl">Break-Even</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:var(--green);">+3.7%</span><span class="lbl">Edge</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:#a78bfa;">+215</span><span class="lbl">Payout</span></div>
     </div>
-    <div class="parlay-note">Both legs are favorites — this pays less than plus-money parlays but hits significantly more often. The goal is sustainable profit over volume, not lottery tickets.</div>
+    <div class="parlay-note">Best 2-leg option. Skenes is the high-probability anchor. Wheeler adds upside at plus money. Strong edge at +3.7 points over break-even.</div>
   </div>
 
-  <!-- 3-LEG PARLAY -->
+  <!-- 3-LEG -->
   <div class="parlay-build">
     <div class="parlay-build-header">
       <div class="parlay-build-title">3-Leg Parlay — Best Value Today</div>
-      <div class="parlay-build-odds">~+430</div>
+      <div class="parlay-build-odds">~+490</div>
     </div>
-    <div class="parlay-build-sub">Combined probability: ~20% · Break-even on +430: 18.9% · Clear positive edge</div>
+    <div class="parlay-build-sub">Combined probability: ~24% · Break-even on +490: 16.9% · Edge: +7.1%</div>
     <div class="parlay-legs">
       <div class="parlay-leg">
         <div class="parlay-leg-num">01</div>
         <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Connelly Early · Outs Under 17.5</div>
-          <div class="parlay-leg-detail">BOS @ TB · TB patient, low-K lineup · road LHP · last start 5.1 IP</div>
+          <div class="parlay-leg-pitcher">Paul Skenes · K Over 6.5</div>
+          <div class="parlay-leg-detail">LAD @ PIT · ~68% probability</div>
         </div>
         <div class="parlay-leg-right">
-          <div class="parlay-leg-odds fav">-137</div>
-          <div class="parlay-leg-prob">~58% probability</div>
+          <div class="parlay-leg-odds fav">-110</div>
+          <div class="parlay-leg-prob">~68%</div>
         </div>
       </div>
       <div class="parlay-leg">
         <div class="parlay-leg-num">02</div>
         <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">C. Sanchez · Outs Over 20.5</div>
-          <div class="parlay-leg-detail">PHI @ TOR · historic form · DK set line at 20.5 confirming expectation of deep outing</div>
+          <div class="parlay-leg-pitcher">Payton Tolle · Outs Over 17.5</div>
+          <div class="parlay-leg-detail">BOS @ TB · ~62% probability · book mispriced at +101</div>
         </div>
         <div class="parlay-leg-right">
-          <div class="parlay-leg-odds fav">-140</div>
-          <div class="parlay-leg-prob">~58% probability</div>
+          <div class="parlay-leg-odds plus">+101</div>
+          <div class="parlay-leg-prob">~62%</div>
         </div>
       </div>
       <div class="parlay-leg">
         <div class="parlay-leg-num">03</div>
         <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">P. Corbin · Outs Under 15.5</div>
-          <div class="parlay-leg-detail">PHI @ TOR · road LHP · 5 of last 11 starts under this line · PHI patient · value leg at +128 adds upside</div>
+          <div class="parlay-leg-pitcher">Zack Wheeler · Outs Over 18.5</div>
+          <div class="parlay-leg-detail">PHI @ TOR · ~57% probability</div>
         </div>
         <div class="parlay-leg-right">
-          <div class="parlay-leg-odds plus">+128</div>
-          <div class="parlay-leg-prob">~53% probability</div>
-        </div>
-      </div>
-    </div>
-    <div class="parlay-math">
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">~20%</span><span class="lbl">Hit Probability</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:var(--text);">~18.9%</span><span class="lbl">Break-Even</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">+1.1%</span><span class="lbl">Edge</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:#a78bfa;">+430</span><span class="lbl">Payout</span></div>
-    </div>
-    <div class="parlay-note">Note: Corbin Under and Sanchez Over are from the same game. If Corbin exits early, Sanchez faces more batters which helps his Outs Over. This is a mild positive correlation — both legs moving in the same favorable direction if the game goes as expected.</div>
-  </div>
-
-  <!-- 4-LEG PARLAY -->
-  <div class="parlay-build">
-    <div class="parlay-build-header">
-      <div class="parlay-build-title">4-Leg Parlay — Upside Build</div>
-      <div class="parlay-build-odds">~+840</div>
-    </div>
-    <div class="parlay-build-sub">Combined probability: ~12% · Break-even on +840: 10.6% · Positive edge but lower hit rate</div>
-    <div class="parlay-legs">
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">01</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Connelly Early · Outs Under 17.5</div>
-          <div class="parlay-leg-detail">BOS @ TB · ~58% probability</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds fav">-137</div>
-          <div class="parlay-leg-prob">~58%</div>
-        </div>
-      </div>
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">02</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">C. Sanchez · Outs Over 20.5</div>
-          <div class="parlay-leg-detail">PHI @ TOR · ~58% probability</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds fav">-140</div>
-          <div class="parlay-leg-prob">~58%</div>
-        </div>
-      </div>
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">03</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">P. Corbin · Outs Under 15.5</div>
-          <div class="parlay-leg-detail">PHI @ TOR · ~53% probability</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds plus">+128</div>
-          <div class="parlay-leg-prob">~53%</div>
-        </div>
-      </div>
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">04</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Gavin Williams · Outs Over 17.5</div>
-          <div class="parlay-leg-detail">NYY @ CLE · Williams at home · NYY road · Outs Over -122 · CLE ace going deep · ~57% probability</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds fav">-122</div>
+          <div class="parlay-leg-odds plus">+119</div>
           <div class="parlay-leg-prob">~57%</div>
         </div>
       </div>
     </div>
     <div class="parlay-math">
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">~12%</span><span class="lbl">Hit Probability</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:var(--text);">~10.6%</span><span class="lbl">Break-Even</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">+1.4%</span><span class="lbl">Edge</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:#a78bfa;">+840</span><span class="lbl">Payout</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:var(--green);">~24%</span><span class="lbl">Hit Prob</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:var(--text);">~16.9%</span><span class="lbl">Break-Even</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:var(--green);">+7.1%</span><span class="lbl">Edge</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:#a78bfa;">+490</span><span class="lbl">Payout</span></div>
     </div>
-    <div class="parlay-note">Williams added as a high-probability Outs Over — he's at home, going deep consistently, and NYY on the road is not an aggressive offense. The 4th leg adds upside without sacrificing the probability logic.</div>
+    <div class="parlay-note">Best 3-leg ticket today. +7.1 edge over break-even is exceptional for a 3-leg parlay. All three plays have strong probability backing — not just attractive odds. Three different games, no correlation.</div>
   </div>
 
-  <!-- RESULT TRACKING FOR STRAIGHT BETS -->
-  <div class="section-header"><h2>Track Straight Bet Results</h2><div class="section-line"></div></div>
-  <div class="picks-grid">
-    <div class="pick-card" id="card-early">
-      <div class="pick-card-header">
-        <div>
-          <div class="pick-pitcher-name">Connelly Early</div>
-          <div class="pick-matchup">BOS @ TB · 3:40 PM · Tropicana Field</div>
-          <div class="pick-sub">LHP · BOS road · 2.95 ERA · last start 5.1 IP · TB bottom-5 K rate</div>
+  <!-- 4-LEG -->
+  <div class="parlay-build">
+    <div class="parlay-build-header">
+      <div class="parlay-build-title">4-Leg Parlay</div>
+      <div class="parlay-build-odds">~+990</div>
+    </div>
+    <div class="parlay-build-sub">Combined probability: ~13% · Break-even on +990: 9.2% · Edge: +3.8%</div>
+    <div class="parlay-legs">
+      <div class="parlay-leg">
+        <div class="parlay-leg-num">01</div>
+        <div class="parlay-leg-info">
+          <div class="parlay-leg-pitcher">Paul Skenes · K Over 6.5</div>
+          <div class="parlay-leg-detail">LAD @ PIT · ~68%</div>
         </div>
-        <div class="pick-grade-badge grade-b">B</div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-label">Our Est.</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:58%;"></div></div>
-        <div class="prob-pct high">58%</div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-label">Break-Even</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:57.8%;"></div></div>
-        <div class="prob-pct mid">57.8%</div>
-      </div>
-      <div class="pick-stats-row">
-        <div class="pick-stat"><span class="val">17.5</span><span class="lbl">Outs Line</span></div>
-        <div class="pick-stat"><span class="val yellow">-137</span><span class="lbl">Under Odds</span></div>
-        <div class="pick-stat"><span class="val yellow">+0.2%</span><span class="lbl">Edge</span></div>
-        <div class="pick-stat"><span class="val blue">72</span><span class="lbl">Score</span></div>
-      </div>
-      <div class="pick-reasoning">Thin edge as a standalone — only 0.2 points over break-even. Better as a parlay leg where it contributes probability mass. TB's patience is the key factor. Only play standalone if you're highly confident in the TB lineup profile today.</div>
-      <div class="pick-footer">
-        <div class="pick-badges">
-          <span class="badge badge-outs-under">Outs Under 17.5</span>
-          <span class="badge badge-parlay">Parlay Leg</span>
-          <span id="status-early" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
+        <div class="parlay-leg-right">
+          <div class="parlay-leg-odds fav">-110</div>
+          <div class="parlay-leg-prob">~68%</div>
         </div>
       </div>
-      <div class="result-buttons">
-        <button class="result-btn btn-win" onclick="setResult('early','win')">✓ Win</button>
-        <button class="result-btn btn-loss" onclick="setResult('early','loss')">✗ Loss</button>
-        <button class="result-btn btn-push" onclick="setResult('early','push')">— Push</button>
-        <button class="result-btn btn-clear" onclick="setResult('early','pending')">Clear</button>
+      <div class="parlay-leg">
+        <div class="parlay-leg-num">02</div>
+        <div class="parlay-leg-info">
+          <div class="parlay-leg-pitcher">Payton Tolle · Outs Over 17.5</div>
+          <div class="parlay-leg-detail">BOS @ TB · ~62%</div>
+        </div>
+        <div class="parlay-leg-right">
+          <div class="parlay-leg-odds plus">+101</div>
+          <div class="parlay-leg-prob">~62%</div>
+        </div>
+      </div>
+      <div class="parlay-leg">
+        <div class="parlay-leg-num">03</div>
+        <div class="parlay-leg-info">
+          <div class="parlay-leg-pitcher">Zack Wheeler · Outs Over 18.5</div>
+          <div class="parlay-leg-detail">PHI @ TOR · ~57%</div>
+        </div>
+        <div class="parlay-leg-right">
+          <div class="parlay-leg-odds plus">+119</div>
+          <div class="parlay-leg-prob">~57%</div>
+        </div>
+      </div>
+      <div class="parlay-leg">
+        <div class="parlay-leg-num">04</div>
+        <div class="parlay-leg-info">
+          <div class="parlay-leg-pitcher">Nathan Eovaldi · Outs Over 18.5</div>
+          <div class="parlay-leg-detail">TEX @ KC · KC high-K lineup · efficient innings · ~56%</div>
+        </div>
+        <div class="parlay-leg-right">
+          <div class="parlay-leg-odds plus">+118</div>
+          <div class="parlay-leg-prob">~56%</div>
+        </div>
       </div>
     </div>
-
-    <div class="pick-card" id="card-williams">
-      <div class="pick-card-header">
-        <div>
-          <div class="pick-pitcher-name">Gavin Williams</div>
-          <div class="pick-matchup">NYY @ CLE · 3:40 PM · Progressive Field</div>
-          <div class="pick-sub">RHP · CLE home · NYY road, low-K lineup · Outs Over 17.5</div>
-        </div>
-        <div class="pick-grade-badge grade-b">B</div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-label">Our Est.</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:57%;"></div></div>
-        <div class="prob-pct high">57%</div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-label">Break-Even</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:54.9%;"></div></div>
-        <div class="prob-pct mid">54.9%</div>
-      </div>
-      <div class="pick-stats-row">
-        <div class="pick-stat"><span class="val">17.5</span><span class="lbl">Outs Line</span></div>
-        <div class="pick-stat"><span class="val yellow">-122</span><span class="lbl">Over Odds</span></div>
-        <div class="pick-stat"><span class="val green">+2.1%</span><span class="lbl">Edge</span></div>
-        <div class="pick-stat"><span class="val blue">70</span><span class="lbl">Score</span></div>
-      </div>
-      <div class="pick-reasoning">Williams at home going 6+ IP is a reasonable expectation. NYY on the road is a disciplined lineup that doesn't chase — meaning they put the ball in play efficiently which can help Williams work through innings without deep counts. Better as parlay leg than standalone.</div>
-      <div class="pick-footer">
-        <div class="pick-badges">
-          <span class="badge badge-outs-over">Outs Over 17.5</span>
-          <span class="badge badge-parlay">Parlay Leg</span>
-          <span id="status-williams" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
-        </div>
-      </div>
-      <div class="result-buttons">
-        <button class="result-btn btn-win" onclick="setResult('williams','win')">✓ Win</button>
-        <button class="result-btn btn-loss" onclick="setResult('williams','loss')">✗ Loss</button>
-        <button class="result-btn btn-push" onclick="setResult('williams','push')">— Push</button>
-        <button class="result-btn btn-clear" onclick="setResult('williams','pending')">Clear</button>
-      </div>
+    <div class="parlay-math">
+      <div class="parlay-math-item"><span class="val" style="color:var(--green);">~13%</span><span class="lbl">Hit Prob</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:var(--text);">~9.2%</span><span class="lbl">Break-Even</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:var(--green);">+3.8%</span><span class="lbl">Edge</span></div>
+      <div class="parlay-math-item"><span class="val" style="color:#a78bfa;">+990</span><span class="lbl">Payout</span></div>
     </div>
+    <div class="parlay-note">Four Outs Over legs — all pitchers who go deep consistently, all at plus money. Strong positive edge at +3.8 points. Note: all four are Outs Over plays so if it's a high-scoring game day the entire ticket can miss. Slight same-direction correlation risk.</div>
   </div>
 
   <!-- PASS -->
   <div class="section-header"><h2>Pass</h2><div class="section-line"></div></div>
-  <div class="avoid-row"><div class="pitcher">Emerson Hancock K 4.5 (-138)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">SEA @ BAL · 3:35 PM</div><div class="reason">-138 on a 4.5 line means break-even is 58%. We can't confidently put Hancock's probability of clearing 4.5 Ks above 58% vs BAL. No value here — book has priced it correctly.</div><span class="badge badge-pass">Pass</span></div>
-  <div class="avoid-row"><div class="pitcher">Gavin Williams K 6.5 (-138)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">NYY @ CLE · 3:40 PM</div><div class="reason">Same problem — break-even is 58%. NYY is a disciplined low-K lineup. Probability of Williams clearing 6.5 Ks vs NYY is closer to 45-50%. No value. Outs Over is the right side on Williams.</div><span class="badge badge-pass">Pass</span></div>
-  <div class="avoid-row"><div class="pitcher">Kyle Harrison K 6.5 (-155)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">MIL @ ATH · 7:05 PM</div><div class="reason">-155 means break-even is 60.8%. ATH is a high-K lineup which helps but Harrison needs to clear 6.5 Ks with 60%+ probability. That's a high bar. Pass K Over. K Under at +111 is the value side if you think he struggles.</div><span class="badge badge-pass">Pass K Over</span></div>
+  <div class="avoid-row"><div class="pitcher">CHC @ COL — all props</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">5:40 PM · Coors Field</div><div class="reason">Auto pass. Coors inflates everything. Tomoyuki Sugano K 2.5 Under at +124 might seem interesting but Coors is too volatile to model.</div><span class="badge badge-pass">Coors Pass</span></div>
+  <div class="avoid-row"><div class="pitcher">Chase Burns K 6.5 (-145)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">CIN @ SD · 6:40 PM</div><div class="reason">Break-even 59.2%. Burns is good but SD is a low-K, patient lineup. Our estimate is ~52-55% — book has it priced correctly or slightly in their favor. No value.</div><span class="badge badge-pass">Pass</span></div>
+  <div class="avoid-row"><div class="pitcher">Freddy Peralta K 5.5 (-145)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">STL @ NYM · 4:10 PM</div><div class="reason">Break-even 59.2%. NYM is a mid-K lineup. Peralta is good but -145 asks too much. K Under at +111 is more interesting — NYM sees pitches and Peralta's walk rate can shorten outings.</div><span class="badge badge-pass">Pass K Over</span></div>
+  <div class="avoid-row"><div class="pitcher">Max Meyer Outs Over 17.5 (-160)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">ARI @ MIA · 3:40 PM</div><div class="reason">Break-even 61.5%. Meyer would need to go 6+ IP in ~62% of starts to justify this price. Not enough 2026 data to project him that confidently. Plus the juice eliminates value even if he's good. Pass.</div><span class="badge badge-pass">Pass</span></div>
+  <div class="avoid-row"><div class="pitcher">Gerrit Cole K 4.5 (-145)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">NYY @ CLE · 3:40 PM</div><div class="reason">Cole's K rate in 2026 has been inconsistent post-injury. CLE is a mid-K lineup. -145 on a 4.5 line break-evens at 59.2% — Cole's probability of clearing 4.5 Ks is not 60%+. No value.</div><span class="badge badge-pass">Pass</span></div>
 
-  <!-- FULL TABLE -->
+  <!-- FULL LINES TABLE -->
   <div class="section-header"><h2>Full Lines Reference</h2><div class="section-line"></div></div>
+  <div style="background:rgba(77,159,255,0.05);border:1px solid rgba(77,159,255,0.15);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--text-muted);margin-bottom:14px;"><strong style="color:var(--blue);">BE% = break-even required by the odds.</strong> Our Est = estimated probability. When Our Est exceeds BE%, there's edge. Green = value. Yellow = neutral. Red = book has the edge.</div>
   <div class="lines-table">
-    <div class="lines-header"><div>Pitcher · Game · Opp K Rate</div><div>K Line</div><div>K Over</div><div>Outs Line</div><div>Outs Over</div><div>Outs Under</div><div>BE%</div></div>
+    <div class="lines-header"><div>Pitcher · Game</div><div>K Line</div><div>K Over</div><div>Outs Line</div><div>Outs Over</div><div>Outs Under</div><div>BE% / Est%</div></div>
 
-    <div class="lines-row grp"><div style="grid-column:1/-1;">3:35 PM · SEA @ BAL</div></div>
-    <div class="lines-row"><div><div class="pc">E. Hancock <span class="tm">SEA road · BAL mid K</span></div></div><div class="ln">4.5</div><div class="ln y">-138</div><div class="ln">17.5</div><div class="ln g">+128</div><div class="ln r">-180</div><div class="ln d">58% / 64%</div></div>
+    <div class="lines-row grp"><div style="grid-column:1/-1;">3:40 PM · LAD @ PIT ⭐ SKENES K OVER</div></div>
+    <div class="lines-row"><div><div class="pc">P. Skenes <span class="tm">PIT (home) · LAD mid K rate</span></div></div><div class="ln">6.5</div><div class="ln y">-110</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln g">52% / 68%</div></div>
+    <div class="lines-row"><div><div class="pc">E. Lauer <span class="tm">LAD (road) · PIT high K rate</span></div></div><div class="ln">4.5</div><div class="ln g">+128</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">43.9% / ~45%</div></div>
 
     <div class="lines-row grp"><div style="grid-column:1/-1;">3:40 PM · NYY @ CLE</div></div>
-    <div class="lines-row"><div><div class="pc">G. Williams <span class="tm">CLE home · NYY low K</span></div></div><div class="ln">6.5</div><div class="ln y">-138</div><div class="ln">17.5</div><div class="ln y">-122</div><div class="ln g">+105</div><div class="ln d">58% / 54.9%</div></div>
-    <div class="lines-row"><div><div class="pc">W. Warren <span class="tm">NYY road · CLE mid K</span></div></div><div class="ln">4.5</div><div class="ln g">+104</div><div class="ln">16.5</div><div class="ln g">+100</div><div class="ln y">-137</div><div class="ln d">49% / 50%</div></div>
+    <div class="lines-row"><div><div class="pc">G. Cole <span class="tm">NYY (road) · CLE mid K rate</span></div></div><div class="ln">4.5</div><div class="ln y">-145</div><div class="ln">17.5</div><div class="ln y">-104</div><div class="ln y">-129</div><div class="ln r">59.2% / ~52%</div></div>
+    <div class="lines-row"><div><div class="pc">S. Cecconi <span class="tm">CLE (home) · NYY low K rate</span></div></div><div class="ln">4.5</div><div class="ln g">+102</div><div class="ln">15.5</div><div class="ln y">-109</div><div class="ln y">-122</div><div class="ln d">49.5% / ~48%</div></div>
 
-    <div class="lines-row grp"><div style="grid-column:1/-1;">3:40 PM · BOS @ TB ⭐ EARLY UNDER</div></div>
-    <div class="lines-row"><div><div class="pc">C. Early <span class="tm">BOS road · TB bot-5 K</span></div></div><div class="ln">4.5</div><div class="ln y">-154</div><div class="ln">17.5</div><div class="ln g">+102</div><div class="ln y">-137</div><div class="ln r">60.6% / 57.8%</div></div>
+    <div class="lines-row grp"><div style="grid-column:1/-1;">3:40 PM · BOS @ TB ⭐ TOLLE OUTS OVER</div></div>
+    <div class="lines-row"><div><div class="pc">P. Tolle <span class="tm">BOS (road) · TB patient</span></div></div><div class="ln">5.5</div><div class="ln g">+100</div><div class="ln">17.5</div><div class="ln g">+101</div><div class="ln y">-136</div><div class="ln g">49.8% / 62%</div></div>
+    <div class="lines-row"><div><div class="pc">N. Martinez <span class="tm">TB (home) · BOS mid K rate</span></div></div><div class="ln">3.5</div><div class="ln y">-132</div><div class="ln">16.5</div><div class="ln y">-128</div><div class="ln g">+101</div><div class="ln d">56.9% / ~45%</div></div>
 
-    <div class="lines-row grp"><div style="grid-column:1/-1;">PHI @ TOR ⭐ CORBIN UNDER · SANCHEZ K OVER + OUTS OVER</div></div>
-    <div class="lines-row"><div><div class="pc">C. Sanchez <span class="tm">PHI road · TOR mid K</span></div></div><div class="ln">6.5</div><div class="ln g">+109</div><div class="ln">20.5</div><div class="ln y">-140</div><div class="ln d">—</div><div class="ln g">47.8% / 58.3%</div></div>
-    <div class="lines-row"><div><div class="pc">P. Corbin <span class="tm">TOR home · PHI patient</span></div></div><div class="ln">3.5</div><div class="ln y">-170</div><div class="ln">15.5</div><div class="ln g">+128</div><div class="ln r">-180</div><div class="ln g">43.8% / 53%</div></div>
+    <div class="lines-row grp"><div style="grid-column:1/-1;">3:40 PM · MIN @ DET</div></div>
+    <div class="lines-row"><div><div class="pc">T. Bradley <span class="tm">MIN (road) · DET mid K rate</span></div></div><div class="ln">5.5</div><div class="ln y">-136</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln r">57.6% / ~50%</div></div>
+    <div class="lines-row"><div><div class="pc">T. Melton <span class="tm">DET (home) · MIN low K rate</span></div></div><div class="ln">4.5</div><div class="ln g">+121</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">45.2% / ~40%</div></div>
+
+    <div class="lines-row grp"><div style="grid-column:1/-1;">3:40 PM · ARI @ MIA</div></div>
+    <div class="lines-row"><div><div class="pc">M. Meyer <span class="tm">MIA (home) · ARI mid K rate</span></div></div><div class="ln">5.5</div><div class="ln y">-118</div><div class="ln">17.5</div><div class="ln y">-160</div><div class="ln g">+120</div><div class="ln r">61.5% / ~52%</div></div>
+    <div class="lines-row"><div><div class="pc">Z. Gallen <span class="tm">ARI (road) · MIA mid K rate</span></div></div><div class="ln">4.5</div><div class="ln g">+108</div><div class="ln">16.5</div><div class="ln y">-113</div><div class="ln y">-118</div><div class="ln d">48.1% / ~50%</div></div>
+
+    <div class="lines-row grp"><div style="grid-column:1/-1;">4:07 PM · PHI @ TOR ⭐ WHEELER OUTS OVER</div></div>
+    <div class="lines-row"><div><div class="pc">Z. Wheeler <span class="tm">PHI (road) · TOR mid K rate</span></div></div><div class="ln">5.5</div><div class="ln y">-145</div><div class="ln">18.5</div><div class="ln g">+119</div><div class="ln y">-159</div><div class="ln g">45.7% / 57%</div></div>
+    <div class="lines-row"><div><div class="pc">D. Cease <span class="tm">TOR (home) · PHI mid K rate</span></div></div><div class="ln">6.5</div><div class="ln y">-130</div><div class="ln">15.5</div><div class="ln y">-103</div><div class="ln y">-130</div><div class="ln d">56.5% / ~54%</div></div>
+
+    <div class="lines-row grp"><div style="grid-column:1/-1;">4:10 PM · STL @ NYM</div></div>
+    <div class="lines-row"><div><div class="pc">F. Peralta <span class="tm">NYM (home) · STL mid K rate</span></div></div><div class="ln">5.5</div><div class="ln y">-145</div><div class="ln">17.5</div><div class="ln y">-108</div><div class="ln y">-127</div><div class="ln r">59.2% / ~53%</div></div>
+    <div class="lines-row"><div><div class="pc">D. May <span class="tm">STL (road) · NYM mid K rate</span></div></div><div class="ln">4.5</div><div class="ln y">-154</div><div class="ln">16.5</div><div class="ln y">-129</div><div class="ln y">-105</div><div class="ln r">60.6% / ~45%</div></div>
+
+    <div class="lines-row grp"><div style="grid-column:1/-1;">4:40 PM · TEX @ KC ⭐ EOVALDI OUTS OVER</div></div>
+    <div class="lines-row"><div><div class="pc">N. Eovaldi <span class="tm">TEX (road) · KC high K rate</span></div></div><div class="ln">5.5</div><div class="ln g">+111</div><div class="ln">18.5</div><div class="ln g">+118</div><div class="ln y">-157</div><div class="ln g">45.8% / 56%</div></div>
+    <div class="lines-row"><div><div class="pc">S. Kolek <span class="tm">KC (home) · TEX mid K rate</span></div></div><div class="ln">3.5</div><div class="ln y">-150</div><div class="ln">17.5</div><div class="ln y">-113</div><div class="ln y">-118</div><div class="ln d">60% / ~52%</div></div>
+
+    <div class="lines-row grp"><div style="grid-column:1/-1;">4:40 PM · ATL @ CWS</div></div>
+    <div class="lines-row"><div><div class="pc">G. Holmes <span class="tm">ATL (road) · CWS top-5 K rate</span></div></div><div class="ln">4.5</div><div class="ln y">-135</div><div class="ln">15.5</div><div class="ln y">-103</div><div class="ln y">-130</div><div class="ln d">57.5% / ~50%</div></div>
+
+    <div class="lines-row grp"><div style="grid-column:1/-1;">5:40 PM · CHC @ COL — ⚠ COORS AUTO PASS</div></div>
+    <div class="lines-row"><div><div class="pc">C. Rea / T. Sugano <span class="tm">Coors Field</span></div></div><div class="ln d">pass</div><div class="ln d">—</div><div class="ln d">pass</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln r">Coors Pass</div></div>
 
     <div class="lines-row grp"><div style="grid-column:1/-1;">6:38 PM · HOU @ LAA</div></div>
-    <div class="lines-row"><div><div class="pc">S. Arrighetti <span class="tm">HOU road · LAA high K</span></div></div><div class="ln">5.5</div><div class="ln g">+104</div><div class="ln">16.5</div><div class="ln y">-122</div><div class="ln y">-110</div><div class="ln d">49% / 52%</div></div>
-    <div class="lines-row"><div><div class="pc">G. Rodriguez <span class="tm">LAA home · HOU avg K</span></div></div><div class="ln">5.5</div><div class="ln g">+111</div><div class="ln">15.5</div><div class="ln y">-127</div><div class="ln y">-108</div><div class="ln d">47.4% / ~50%</div></div>
+    <div class="lines-row"><div><div class="pc">K-W Teng <span class="tm">HOU (road) · LAA high K rate</span></div></div><div class="ln">4.5</div><div class="ln y">-138</div><div class="ln">14.5</div><div class="ln y">-190</div><div class="ln g">+139</div><div class="ln r">58% / ~40%</div></div>
+    <div class="lines-row"><div><div class="pc">W. Urena <span class="tm">LAA (home) · HOU avg K rate</span></div></div><div class="ln">4.5</div><div class="ln g">+107</div><div class="ln">15.5</div><div class="ln y">-113</div><div class="ln y">-118</div><div class="ln d">48.3% / ~50%</div></div>
 
     <div class="lines-row grp"><div style="grid-column:1/-1;">6:40 PM · CIN @ SD</div></div>
-    <div class="lines-row"><div><div class="pc">A. Abbott <span class="tm">CIN road · SD mid K</span></div></div><div class="ln">4.5</div><div class="ln y">-102</div><div class="ln">17.5</div><div class="ln y">-124</div><div class="ln y">-108</div><div class="ln d">50.5% / ~52%</div></div>
-    <div class="lines-row"><div><div class="pc">W. Buehler <span class="tm">SD home · CIN mid K</span></div></div><div class="ln">4.5</div><div class="ln y">-129</div><div class="ln">15.5</div><div class="ln y">-108</div><div class="ln y">-124</div><div class="ln d">56.3% / ~50%</div></div>
+    <div class="lines-row"><div><div class="pc">C. Burns <span class="tm">CIN (road) · SD low K rate</span></div></div><div class="ln">6.5</div><div class="ln y">-145</div><div class="ln">17.5</div><div class="ln y">-160</div><div class="ln g">+112</div><div class="ln r">59.2% / ~52%</div></div>
+    <div class="lines-row"><div><div class="pc">L. Giolito <span class="tm">SD (home) · CIN mid K rate</span></div></div><div class="ln">4.5</div><div class="ln y">-107</div><div class="ln">15.5</div><div class="ln g">+124</div><div class="ln y">-170</div><div class="ln d">51.7% / ~50%</div></div>
 
     <div class="lines-row grp"><div style="grid-column:1/-1;">6:45 PM · WSH @ SF</div></div>
-    <div class="lines-row"><div><div class="pc">L. Webb <span class="tm">SF home · WSH high K</span></div></div><div class="ln">5.5</div><div class="ln g">+120</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">45.5% / ~55%</div></div>
-    <div class="lines-row"><div><div class="pc">M. Mikolas <span class="tm">WSH road · SF mid K</span></div></div><div class="ln">3.5</div><div class="ln g">+132</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">43.1% / ~35%</div></div>
+    <div class="lines-row"><div><div class="pc">A. Houser <span class="tm">SF (home) · WSH high K rate</span></div></div><div class="ln">3.5</div><div class="ln y">-117</div><div class="ln">15.5</div><div class="ln y">-109</div><div class="ln y">-122</div><div class="ln d">53.9% / ~50%</div></div>
+    <div class="lines-row"><div><div class="pc">A. Alvarez <span class="tm">WSH (road) · SF mid K rate</span></div></div><div class="ln">4.5</div><div class="ln g">+115</div><div class="ln">15.5</div><div class="ln g">+108</div><div class="ln y">-143</div><div class="ln d">46.5% / ~45%</div></div>
 
     <div class="lines-row grp"><div style="grid-column:1/-1;">7:05 PM · MIL @ ATH</div></div>
-    <div class="lines-row"><div><div class="pc">K. Harrison <span class="tm">MIL road · ATH high K</span></div></div><div class="ln">6.5</div><div class="ln y">-155</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln g">+111</div><div class="ln d">60.8% / ~50%</div></div>
-    <div class="lines-row"><div><div class="pc">J. Springs <span class="tm">ATH home · MIL mid K</span></div></div><div class="ln">4.5</div><div class="ln g">+117</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln y">-154</div><div class="ln d">46.1% / ~45%</div></div>
+    <div class="lines-row"><div><div class="pc">R. Gasser <span class="tm">MIL (road) · ATH high K rate</span></div></div><div class="ln">4.5</div><div class="ln g">+105</div><div class="ln">14.5</div><div class="ln y">-129</div><div class="ln y">-104</div><div class="ln d">48.8% / ~45%</div></div>
+    <div class="lines-row"><div><div class="pc">J.T. Ginn <span class="tm">ATH (home) · MIL mid K rate</span></div></div><div class="ln">4.5</div><div class="ln g">+121</div><div class="ln">14.5</div><div class="ln y">-150</div><div class="ln g">+110</div><div class="ln d">45.2% / ~45%</div></div>
 
   </div>
 
   <div style="margin-top:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-dim);line-height:1.7;">
-    <strong style="color:var(--text-muted);">BE% column:</strong> Left number = break-even percentage required by the odds. Right number = our estimated hit probability. When our estimate exceeds break-even, there's positive expected value. Corbin Under: 43.8% break-even vs ~53% estimate = +9.2 point edge. That's a strong straight bet. All lines from your DK screenshots.
+    <strong style="color:var(--text-muted);">BE% / Est% column:</strong> Left = break-even required. Right = our estimated probability. Green rows = clear positive edge. Red rows = book has the edge, pass. Tolle at 49.8% / 62% is the biggest mispricing on the slate. All lines from your DK screenshots.
   </div>
 
 </main>
-<div class="watermark">PitchEdge · Research Tool · Not Financial Advice</div>
 <script>
-const PICKS=['corbin','sanchez','early','williams'];
-const KEY='pitchedge_results_jun8_2026';
+const PICKS=['tolle','skenes','wheeler','eovaldi'];
+const KEY='pitchedge_results_jun9_2026';
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
 function save(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
 function setResult(p,r){const d=load();d[p]=r;save(d);apply(d);record(d);}
