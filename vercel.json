@@ -1,5 +1,93 @@
-api/
-  data.js
-README.md
-index.html
-vercel.json   ← needs to be here
+export const config = { runtime: 'edge' };
+
+const MLB = 'https://statsapi.mlb.com/api/v1';
+const ODDS = 'https://api.the-odds-api.com/v4';
+
+const CORS = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+};
+
+function getAbbr(name) {
+  const map = {
+    'Arizona Diamondbacks':'ARI','Atlanta Braves':'ATL','Baltimore Orioles':'BAL',
+    'Boston Red Sox':'BOS','Chicago Cubs':'CHC','Chicago White Sox':'CWS',
+    'Cincinnati Reds':'CIN','Cleveland Guardians':'CLE','Colorado Rockies':'COL',
+    'Detroit Tigers':'DET','Houston Astros':'HOU','Kansas City Royals':'KC',
+    'Los Angeles Angels':'LAA','Los Angeles Dodgers':'LAD','Miami Marlins':'MIA',
+    'Milwaukee Brewers':'MIL','Minnesota Twins':'MIN','New York Mets':'NYM',
+    'New York Yankees':'NYY','Oakland Athletics':'OAK','Philadelphia Phillies':'PHI',
+    'Pittsburgh Pirates':'PIT','San Diego Padres':'SD','San Francisco Giants':'SF',
+    'Seattle Mariners':'SEA','St. Louis Cardinals':'STL','Tampa Bay Rays':'TB',
+    'Texas Rangers':'TEX','Toronto Blue Jays':'TOR','Washington Nationals':'WSH',
+    'Athletics':'ATH'
+  };
+  return map[name] || name.split(' ').pop().slice(0,3).toUpperCase();
+}
+
+export default async function handler(req) {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: CORS });
+  }
+
+  const { searchParams } = new URL(req.url);
+  const type = searchParams.get('type');
+
+  try {
+    // Return both MLB teams AND odds in a single call to save requests
+    if (type === 'all') {
+      const oddsKey = searchParams.get('oddsKey') || '';
+      const book = searchParams.get('book') || 'draftkings';
+
+      const [alRes, nlRes, oddsRes] = await Promise.all([
+        fetch(`${MLB}/standings?leagueId=103&season=2026&standingsTypes=regularSeason`),
+        fetch(`${MLB}/standings?leagueId=104&season=2026&standingsTypes=regularSeason`),
+        fetch(`${ODDS}/sports/baseball_mlb/odds/?apiKey=${oddsKey}&regions=us&markets=totals,h2h&bookmakers=${book}&oddsFormat=american`)
+      ]);
+
+      const [alData, nlData, oddsData] = await Promise.all([
+        alRes.json(),
+        nlRes.json(),
+        oddsRes.json()
+      ]);
+
+      // Parse teams into flat keyed object by full name
+      const teams = {};
+      for (const data of [alData, nlData]) {
+        const league = data === alData ? 'AL' : 'NL';
+        for (const div of (data.records || [])) {
+          for (const t of (div.teamRecords || [])) {
+            const gp = Math.max(t.gamesPlayed || 1, 1);
+            const rs = t.runsScored || 0;
+            const ra = t.runsAllowed || 0;
+            const l10 = (t.records?.splitRecords || []).find(r => r.type === 'lastTen');
+            teams[t.team.name] = {
+              name: t.team.name,
+              abbr: getAbbr(t.team.name),
+              league,
+              w: t.wins || 0,
+              l: t.losses || 0,
+              wp: parseFloat(t.winningPercentage) || 0,
+              rs, ra, gp,
+              rsg: rs / gp,
+              rag: ra / gp,
+              rd: rs - ra,
+              l10w: parseInt(l10?.wins || 5),
+              l10l: parseInt(l10?.losses || 5),
+            };
+          }
+        }
+      }
+
+      const games = Array.isArray(oddsData) ? oddsData : [];
+      const remaining = oddsRes.headers.get('x-requests-remaining') || '?';
+
+      return new Response(JSON.stringify({ teams, games, remaining, teamCount: Object.keys(teams).length }), { headers: CORS });
+    }
+
+    return new Response(JSON.stringify({ error: 'Unknown type' }), { status: 400, headers: CORS });
+
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message, stack: e.stack }), { status: 500, headers: CORS });
+  }
+}
