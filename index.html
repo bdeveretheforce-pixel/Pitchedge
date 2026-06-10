@@ -581,6 +581,20 @@ async function runEngine(){
       }
     }
 
+    // Show debug on screen
+    const debugLines=[];
+    for(const g of games){
+      const bk=g.bookmakers?.find(b=>b.key===S.settings.book)||g.bookmakers?.[0];
+      if(!bk) continue;
+      const an=g.away_team,hn=g.home_team;
+      const aa=abbr(an),ha=abbr(hn);
+      const at=Object.values(teams).find(t=>t.name===an||t.abbr===aa||an.includes(t.name.split(' ').pop())||t.name.includes(an.split(' ').pop()));
+      const ht=Object.values(teams).find(t=>t.name===hn||t.abbr===ha||hn.includes(t.name.split(' ').pop())||t.name.includes(hn.split(' ').pop()));
+      debugLines.push(`${aa}@${ha}: away=${at?'✓':an} home=${ht?'✓':hn}`);
+    }
+    const lri=document.getElementById('lastRunInfo');
+    if(lri) lri.innerHTML=`<strong>${picks.length} picks from ${games.length} games</strong><br><br>`+debugLines.join('<br>');
+
     // Sort by confidence desc
     picks.sort((a,b)=>b.conf-a.conf);
 
