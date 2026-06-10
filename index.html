@@ -454,169 +454,97 @@ async function runEngine(){
   save();
 
   try{
-    // STEP 1 — MLB standings via proxy
-    setStatus('mlb','live','MLB API: fetching...');
-    const mlbR = await fetch(`/api/data?type=mlb`);
-    if(!mlbR.ok) throw new Error(`MLB proxy error ${mlbR.status}`);
-    const mlbD = await mlbR.json();
-    if(mlbD.error) throw new Error(`MLB API: ${mlbD.error}`);
-    const alD = mlbD.al, nlD = mlbD.nl;
+    setStatus('mlb','live','Loading data...');
+    setStatus('odds','live','');
+    setStatus('engine','live','');
 
-    const teams={};
-    const allRecs=[...(alD.records||[]),...(nlD.records||[])];
-    // dedupe in case combined call returned everything in alD
-    const seen=new Set();
-    for(const rec of allRecs){
-      const league=rec.league?.name?.includes('American')?'AL':'NL';
-      for(const t of rec.teamRecords||[]){
-        if(seen.has(t.team.id)) continue;
-        seen.add(t.team.id);
-        const gp=Math.max(t.gamesPlayed||1,1);
-        const rs=t.runsScored||0,ra=t.runsAllowed||0;
-        const l10=t.records?.splitRecords?.find(r=>r.type==='lastTen');
-        teams[t.team.id]={
-          id:t.team.id,name:t.team.name,abbr:abbr(t.team.name),league,
-          w:t.wins||0,l:t.losses||0,wp:parseFloat(t.winningPercentage)||0,
-          rs,ra,gp,rsg:rs/gp,rag:ra/gp,avg:(rs+ra)/gp,rd:rs-ra,
-          l10w:parseInt(l10?.wins||5),l10l:parseInt(l10?.losses||5),
-          streak:t.streak?.streakCode||'',
-        };
-      }
-    }
-    S.teams=teams;
-    const teamCount=Object.keys(teams).length;
+    const res = await fetch(`/api/data?type=all&oddsKey=${S.settings.oddsKey}&book=${S.settings.book}`);
+    if(!res.ok) throw new Error(`Proxy error ${res.status}`);
+    const payload = await res.json();
+    if(payload.error) throw new Error(payload.error);
+
+    const teams = payload.teams || {};
+    const games = payload.games || [];
+    const teamCount = payload.teamCount || 0;
+
     setStatus('mlb','live',`MLB API: ${teamCount} teams ✓`);
-    toast(`Team data loaded (${teamCount} teams)`,'success');
-
-    // STEP 2 — Odds via proxy
-    setStatus('odds','live','Odds API: fetching...');
-    const oddsR=await fetch(`/api/data?type=odds&oddsKey=${S.settings.oddsKey}&book=${S.settings.book}`);
-    if(!oddsR.ok) throw new Error(`Odds proxy error ${oddsR.status}`);
-    const oddsD=await oddsR.json();
-    if(oddsD.error) throw new Error(`Odds API: ${oddsD.error}`);
-    const games=oddsD.games||[];
-    const rem=oddsD.remaining||'?';
-    setStatus('odds','live',`Odds API: ${games.length} games ✓ (${rem} left)`);
-
-    // STEP 3 — Score every game
+    setStatus('odds','live',`Odds API: ${games.length} games ✓ (${payload.remaining} left)`);
     setStatus('engine','live','Engine: scoring...');
-    const picks=[];
+
+    S.teams = teams;
+
+    if(teamCount === 0) throw new Error('No team data returned from MLB API');
+    if(games.length === 0) throw new Error('No games returned from Odds API');
+
+    const picks = [];
 
     for(const g of games){
-      const bk=g.bookmakers?.find(b=>b.key===S.settings.book)||g.bookmakers?.[0];
+      const bk = g.bookmakers?.find(b=>b.key===S.settings.book) || g.bookmakers?.[0];
       if(!bk) continue;
 
-      const awayName=g.away_team,homeName=g.home_team;
-      const awayAbbr=abbr(awayName),homeAbbr=abbr(homeName);
-      const awayT=Object.values(teams).find(t=>t.name===awayName||t.abbr===awayAbbr||awayName.includes(t.name.split(' ').pop())||t.name.includes(awayName.split(' ').pop()));
-      const homeT=Object.values(teams).find(t=>t.name===homeName||t.abbr===homeAbbr||homeName.includes(t.name.split(' ').pop())||t.name.includes(homeName.split(' ').pop()));
+      const awayName = g.away_team;
+      const homeName = g.home_team;
 
-      // Debug log so we can see what's matching
-      console.log(`Game: ${awayName} @ ${homeName} | Away match: ${awayT?.name||'NONE'} | Home match: ${homeT?.name||'NONE'}`);
+      // Direct name lookup - proxy already keyed by full name
+      const awayT = teams[awayName];
+      const homeT = teams[homeName];
 
-      // Skip if no team data found
-      if(!awayT||!homeT){
-        console.warn(`Skipping - no team data: away=${awayName}(${awayAbbr}) home=${homeName}(${homeAbbr})`);
-        continue;
-      }
+      if(!awayT || !homeT) continue;
 
-      const isCoors=homeName.includes('Rockies');
-      const gameTime=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
+      const isCoors = homeName.includes('Rockies');
+      const gameTime = new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
 
-      // --- TOTALS ---
-      const totMkt=bk.markets?.find(m=>m.key==='totals');
+      // TOTALS
+      const totMkt = bk.markets?.find(m=>m.key==='totals');
       if(totMkt){
-        const overOut=totMkt.outcomes?.find(o=>o.name==='Over');
-        const underOut=totMkt.outcomes?.find(o=>o.name==='Under');
-        const line=overOut?.point||underOut?.point;
-
+        const overOut = totMkt.outcomes?.find(o=>o.name==='Over');
+        const underOut = totMkt.outcomes?.find(o=>o.name==='Under');
+        const line = overOut?.point || underOut?.point;
         if(line){
-          const combinedRSG=awayT.rsg+homeT.rsg;
-          const combinedRAG=awayT.rag+homeT.rag;
-          const trueAvg=(combinedRSG+combinedRAG)/2;
-          const l10Combined=(awayT.l10w*1.0/(awayT.l10w+awayT.l10l||1)*9)+
-                            (homeT.l10w*1.0/(homeT.l10w+homeT.l10l||1)*9);
+          const trueAvg = (awayT.rsg + homeT.rsg + awayT.rag + homeT.rag) / 2;
+          const overScore = scoreTotal('over', line, awayT, homeT, trueAvg, isCoors);
+          const underScore = scoreTotal('under', line, awayT, homeT, trueAvg, isCoors);
+          const overOdds = overOut?.price ? (overOut.price>0?'+'+overOut.price:String(overOut.price)) : '-110';
+          const underOdds = underOut?.price ? (underOut.price>0?'+'+underOut.price:String(underOut.price)) : '-110';
 
-          // Score OVER
-          const overScore=scoreTotal('over',line,awayT,homeT,trueAvg,isCoors);
-          // Score UNDER
-          const underScore=scoreTotal('under',line,awayT,homeT,trueAvg,isCoors);
-
-          // Generate both over and under for every game — best score wins per game
-          const overOdds=overOut?.price?(overOut.price>0?'+'+overOut.price:String(overOut.price)):'-110';
-          const underOdds=underOut?.price?(underOut.price>0?'+'+underOut.price:String(underOut.price)):'-110';
-
-          // Show the better side for each game (always output something)
-          if(overScore>underScore){
-            picks.push(buildTotalPick(g,awayT,homeT,'over',line,overOdds,overScore,trueAvg,gameTime,isCoors));
+          // Always output the better side
+          if(overScore >= underScore){
+            picks.push(buildTotalPick(g, awayT, homeT, 'over', line, overOdds, overScore, trueAvg, gameTime, isCoors));
+            if(underScore >= 60) picks.push(buildTotalPick(g, awayT, homeT, 'under', line, underOdds, underScore, trueAvg, gameTime, isCoors));
           } else {
-            picks.push(buildTotalPick(g,awayT,homeT,'under',line,underOdds,underScore,trueAvg,gameTime,isCoors));
-          }
-          // Also push the other side if it scores 60+
-          if(overScore>underScore && underScore>=60){
-            picks.push(buildTotalPick(g,awayT,homeT,'under',line,underOdds,underScore,trueAvg,gameTime,isCoors));
-          } else if(underScore>overScore && overScore>=60){
-            picks.push(buildTotalPick(g,awayT,homeT,'over',line,overOdds,overScore,trueAvg,gameTime,isCoors));
+            picks.push(buildTotalPick(g, awayT, homeT, 'under', line, underOdds, underScore, trueAvg, gameTime, isCoors));
+            if(overScore >= 60) picks.push(buildTotalPick(g, awayT, homeT, 'over', line, overOdds, overScore, trueAvg, gameTime, isCoors));
           }
         }
       }
 
-      // --- SIDES (ML only) ---
-      const mlMkt=bk.markets?.find(m=>m.key==='h2h');
+      // SIDES
+      const mlMkt = bk.markets?.find(m=>m.key==='h2h');
       if(mlMkt){
-        const awayML=mlMkt.outcomes?.find(o=>o.name===awayName);
-        const homeML=mlMkt.outcomes?.find(o=>o.name===homeName);
-
-        const awayMLScore=scoreSide('away',awayT,homeT,awayML?.price);
-        const homeMLScore=scoreSide('home',homeT,awayT,homeML?.price);
-
-        const fmtO=p=>p!=null?(p>0?'+'+p:String(p)):null;
-
-        if(awayMLScore>=55 && awayML?.price){
-          picks.push(buildSidePick(g,awayT,homeT,'away',fmtO(awayML.price),awayMLScore,gameTime));
-        }
-        if(homeMLScore>=55 && homeML?.price){
-          picks.push(buildSidePick(g,homeT,awayT,'home',fmtO(homeML.price),homeMLScore,gameTime));
-        }
+        const awayML = mlMkt.outcomes?.find(o=>o.name===awayName);
+        const homeML = mlMkt.outcomes?.find(o=>o.name===homeName);
+        const fmt = p => p!=null?(p>0?'+'+p:String(p)):null;
+        const awayScore = scoreSide('away', awayT, homeT, awayML?.price);
+        const homeScore = scoreSide('home', homeT, awayT, homeML?.price);
+        if(awayScore >= 58 && awayML?.price) picks.push(buildSidePick(g, awayT, homeT, 'away', fmt(awayML.price), awayScore, gameTime));
+        if(homeScore >= 58 && homeML?.price) picks.push(buildSidePick(g, homeT, awayT, 'home', fmt(homeML.price), homeScore, gameTime));
       }
     }
 
-    // Show debug on screen
-    const debugLines=[];
-    for(const g of games){
-      const bk=g.bookmakers?.find(b=>b.key===S.settings.book)||g.bookmakers?.[0];
-      if(!bk) continue;
-      const an=g.away_team,hn=g.home_team;
-      const aa=abbr(an),ha=abbr(hn);
-      const at=Object.values(teams).find(t=>t.name===an||t.abbr===aa||an.includes(t.name.split(' ').pop())||t.name.includes(an.split(' ').pop()));
-      const ht=Object.values(teams).find(t=>t.name===hn||t.abbr===ha||hn.includes(t.name.split(' ').pop())||t.name.includes(hn.split(' ').pop()));
-      debugLines.push(`${aa}@${ha}: away=${at?'✓':an} home=${ht?'✓':hn}`);
-    }
-    const lri=document.getElementById('lastRunInfo');
-    if(lri) lri.innerHTML=`<strong>${picks.length} picks from ${games.length} games</strong><br><br>`+debugLines.join('<br>');
+    picks.sort((a,b) => b.conf - a.conf);
+    if(picks.length) picks[0].isPOTD = true;
 
-    // Sort by confidence desc
-    picks.sort((a,b)=>b.conf-a.conf);
-
-    // Mark highest as POTD
-    if(picks.length) picks[0].isPOTD=true;
-
-    // Save picks
-    picks.forEach(p=>{
-      p.result='pending';p.dk=todayKey();p.closeLine=null;
-      p.createdAt=new Date().toISOString();p.manual=false;
-      p.id=uid();
+    picks.forEach(p => {
+      p.result='pending'; p.dk=todayKey(); p.closeLine=null;
+      p.createdAt=new Date().toISOString(); p.manual=false; p.id=uid();
     });
     S.picks.push(...picks);
     save();
 
     setStatus('engine','live',`Engine: ${picks.length} picks generated ✓`);
     document.getElementById('picksGenerated').textContent=`${picks.length} picks generated`;
-
-    // Update last run info
     const lri=document.getElementById('lastRunInfo');
-    if(lri) lri.textContent=`Last run: ${new Date().toLocaleTimeString()} · ${picks.length} picks · ${games.length} games scored`;
-
+    if(lri) lri.textContent=`Last run: ${new Date().toLocaleTimeString()} · ${picks.length} picks from ${games.length} games`;
     updCount();
     renderDash();
     toast(`${picks.length} picks generated from ${games.length} games`,'success');
@@ -626,14 +554,12 @@ async function runEngine(){
     setStatus('odds','error','Odds API: failed');
     setStatus('engine','error',`Error: ${e.message}`);
     toast('Engine error: '+e.message,'error');
-    // Show error detail on dashboard
     const pb=document.getElementById('potdBlock');
     if(pb) pb.innerHTML=`<div class="potd" style="border-color:rgba(255,69,96,.3)">
       <div style="font-size:11px;color:var(--rd);font-weight:700;margin-bottom:6px">Engine Error</div>
       <div style="font-size:12px;color:var(--t2);line-height:1.6">${e.message}</div>
-      <div style="font-size:11px;color:var(--t3);margin-top:8px">Try: switch to DraftKings in Admin, then hit Generate Picks again. If MLB API is down, check statsapi.mlb.com directly.</div>
+      <div style="font-size:11px;color:var(--t3);margin-top:8px">Check Admin panel and try Generate Picks again.</div>
     </div>`;
-    console.error('PitchEdge engine error:',e);
   }
 
   btn.innerHTML='⟳ Generate Picks';
