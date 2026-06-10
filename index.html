@@ -508,11 +508,17 @@ async function runEngine(){
 
       const awayName=g.away_team,homeName=g.home_team;
       const awayAbbr=abbr(awayName),homeAbbr=abbr(homeName);
-      const awayT=Object.values(teams).find(t=>t.name===awayName||t.abbr===awayAbbr);
-      const homeT=Object.values(teams).find(t=>t.name===homeName||t.abbr===homeAbbr);
+      const awayT=Object.values(teams).find(t=>t.name===awayName||t.abbr===awayAbbr||awayName.includes(t.name.split(' ').pop())||t.name.includes(awayName.split(' ').pop()));
+      const homeT=Object.values(teams).find(t=>t.name===homeName||t.abbr===homeAbbr||homeName.includes(t.name.split(' ').pop())||t.name.includes(homeName.split(' ').pop()));
 
-      // Skip if no team data
-      if(!awayT||!homeT) continue;
+      // Debug log so we can see what's matching
+      console.log(`Game: ${awayName} @ ${homeName} | Away match: ${awayT?.name||'NONE'} | Home match: ${homeT?.name||'NONE'}`);
+
+      // Skip if no team data found
+      if(!awayT||!homeT){
+        console.warn(`Skipping - no team data: away=${awayName}(${awayAbbr}) home=${homeName}(${homeAbbr})`);
+        continue;
+      }
 
       const isCoors=homeName.includes('Rockies');
       const gameTime=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
