@@ -536,15 +536,21 @@ async function runEngine(){
           // Score UNDER
           const underScore=scoreTotal('under',line,awayT,homeT,trueAvg,isCoors);
 
+          // Generate both over and under for every game — best score wins per game
           const overOdds=overOut?.price?(overOut.price>0?'+'+overOut.price:String(overOut.price)):'-110';
           const underOdds=underOut?.price?(underOut.price>0?'+'+underOut.price:String(underOut.price)):'-110';
 
-          // Only add if score >= 65
-          if(overScore>=65){
+          // Show the better side for each game (always output something)
+          if(overScore>underScore){
             picks.push(buildTotalPick(g,awayT,homeT,'over',line,overOdds,overScore,trueAvg,gameTime,isCoors));
-          }
-          if(underScore>=65){
+          } else {
             picks.push(buildTotalPick(g,awayT,homeT,'under',line,underOdds,underScore,trueAvg,gameTime,isCoors));
+          }
+          // Also push the other side if it scores 60+
+          if(overScore>underScore && underScore>=60){
+            picks.push(buildTotalPick(g,awayT,homeT,'under',line,underOdds,underScore,trueAvg,gameTime,isCoors));
+          } else if(underScore>overScore && overScore>=60){
+            picks.push(buildTotalPick(g,awayT,homeT,'over',line,overOdds,overScore,trueAvg,gameTime,isCoors));
           }
         }
       }
@@ -560,10 +566,10 @@ async function runEngine(){
 
         const fmtO=p=>p!=null?(p>0?'+'+p:String(p)):null;
 
-        if(awayMLScore>=68 && awayML?.price){
+        if(awayMLScore>=55 && awayML?.price){
           picks.push(buildSidePick(g,awayT,homeT,'away',fmtO(awayML.price),awayMLScore,gameTime));
         }
-        if(homeMLScore>=68 && homeML?.price){
+        if(homeMLScore>=55 && homeML?.price){
           picks.push(buildSidePick(g,homeT,awayT,'home',fmtO(homeML.price),homeMLScore,gameTime));
         }
       }
@@ -618,100 +624,91 @@ async function runEngine(){
 // SCORING FORMULAS — real data in, confidence score out
 // ============================================================
 function scoreTotal(dir,line,awayT,homeT,trueAvg,isCoors){
-  if(isCoors) return 0; // Coors hard pass
+  if(isCoors) return 0;
 
   let score=50;
   const diff=trueAvg-line;
   const pctDiff=diff/line;
 
-  // Primary: does the line match the run environment?
   if(dir==='over'){
-    if(pctDiff>0.08) score+=18;       // line significantly under true avg
-    else if(pctDiff>0.04) score+=10;
-    else if(pctDiff>0.01) score+=5;
-    else if(pctDiff<-0.05) score-=12; // line over true avg = fade
-    else if(pctDiff<-0.02) score-=6;
+    if(pctDiff>0.06) score+=18;
+    else if(pctDiff>0.03) score+=12;
+    else if(pctDiff>0.01) score+=6;
+    else if(pctDiff>-0.01) score+=2;
+    else if(pctDiff<-0.05) score-=10;
+    else if(pctDiff<-0.02) score-=5;
   } else {
-    if(pctDiff<-0.08) score+=18;      // line significantly over true avg
-    else if(pctDiff<-0.04) score+=10;
-    else if(pctDiff<-0.01) score+=5;
-    else if(pctDiff>0.05) score-=12;
-    else if(pctDiff>0.02) score-=6;
+    if(pctDiff<-0.06) score+=18;
+    else if(pctDiff<-0.03) score+=12;
+    else if(pctDiff<-0.01) score+=6;
+    else if(pctDiff<0.01) score+=2;
+    else if(pctDiff>0.05) score-=10;
+    else if(pctDiff>0.02) score-=5;
   }
 
   // L10 momentum
   const awayL10Rate=awayT.l10w/(awayT.l10w+awayT.l10l||1);
   const homeL10Rate=homeT.l10w/(homeT.l10w+homeT.l10l||1);
-  const avgL10=(awayL10Rate+homeL10Rate)/2;
   const awayL10RS=awayT.rsg*(awayL10Rate>0.6?1.08:awayL10Rate<0.4?0.93:1);
   const homeL10RS=homeT.rsg*(homeL10Rate>0.6?1.08:homeL10Rate<0.4?0.93:1);
   const l10Proj=awayL10RS+homeL10RS;
   const l10Diff=l10Proj-line;
 
-  if(dir==='over' && l10Diff>0.4) score+=7;
-  if(dir==='over' && l10Diff>0.8) score+=5;
-  if(dir==='under' && l10Diff<-0.4) score+=7;
-  if(dir==='under' && l10Diff<-0.8) score+=5;
+  if(dir==='over' && l10Diff>0.3) score+=7;
+  if(dir==='over' && l10Diff>0.7) score+=4;
+  if(dir==='under' && l10Diff<-0.3) score+=7;
+  if(dir==='under' && l10Diff<-0.7) score+=4;
 
-  // High-run-environment teams
   if(dir==='over'){
-    if(awayT.rsg>5.2) score+=5;
-    if(homeT.rsg>5.2) score+=5;
-    if(awayT.rag>5.0) score+=4;
-    if(homeT.rag>5.0) score+=4;
+    if(awayT.rsg>5.0) score+=5;
+    if(homeT.rsg>5.0) score+=5;
+    if(awayT.rag>4.8) score+=3;
+    if(homeT.rag>4.8) score+=3;
   } else {
-    if(awayT.rsg<4.0) score+=5;
-    if(homeT.rsg<4.0) score+=5;
-    if(awayT.rag<3.9) score+=4;
-    if(homeT.rag<3.9) score+=4;
+    if(awayT.rsg<4.2) score+=5;
+    if(homeT.rsg<4.2) score+=5;
+    if(awayT.rag<4.0) score+=3;
+    if(homeT.rag<4.0) score+=3;
   }
 
-  // Run differential edge
   if(dir==='under'){
-    if(awayT.rd<-30) score+=4;
-    if(homeT.rd<-30) score+=4;
+    if(awayT.rd<-20) score+=4;
+    if(homeT.rd<-20) score+=4;
   }
 
-  return Math.min(97,Math.max(0,Math.round(score)));
+  return Math.min(97,Math.max(40,Math.round(score)));
 }
 
 function scoreSide(dir,favT,dogT,mlOdds){
   let score=50;
-
-  // Win % edge
   const wpDiff=favT.wp-dogT.wp;
-  if(wpDiff>0.12) score+=12;
-  else if(wpDiff>0.07) score+=7;
-  else if(wpDiff>0.03) score+=4;
-  else if(wpDiff<-0.05) score-=8;
+  if(wpDiff>0.10) score+=12;
+  else if(wpDiff>0.06) score+=7;
+  else if(wpDiff>0.02) score+=3;
+  else if(wpDiff<-0.05) score-=7;
 
-  // Run differential
-  if(favT.rd>50) score+=8;
-  else if(favT.rd>25) score+=5;
-  else if(favT.rd<-25) score-=7;
+  if(favT.rd>40) score+=8;
+  else if(favT.rd>20) score+=4;
+  else if(favT.rd<-20) score-=6;
 
-  // L10 momentum
   const l10Rate=favT.l10w/(favT.l10w+favT.l10l||1);
   if(l10Rate>=0.8) score+=9;
   else if(l10Rate>=0.7) score+=5;
   else if(l10Rate<=0.3) score-=8;
   else if(l10Rate<=0.4) score-=4;
 
-  // Home field boost
   if(dir==='home') score+=3;
 
-  // Don't bet huge favorites — less value
   if(mlOdds){
     const odds=parseInt(mlOdds);
-    if(odds<-200) score-=8;
-    else if(odds<-160) score-=4;
-    else if(odds>+150) score-=6; // big dog is risky
+    if(odds<-220) score-=10;
+    else if(odds<-170) score-=5;
+    else if(odds>+160) score-=5;
   }
 
-  // Offense vs defense edge
-  if(favT.rsg>dogT.rag+0.5) score+=5;
+  if(favT.rsg>dogT.rag+0.4) score+=5;
 
-  return Math.min(94,Math.max(0,Math.round(score)));
+  return Math.min(94,Math.max(40,Math.round(score)));
 }
 
 // ============================================================
@@ -779,6 +776,9 @@ function pickCard(p){
   const dc=dirClass(p),c=cc(p.conf),bs=betStr(p);
   const rb=p.result!=='pending'?`<span class="rb ${p.result}">${p.result.toUpperCase()}</span>`:'';
   const potdBadge=p.isPOTD?`<span style="font-size:9px;font-weight:700;color:var(--ac);background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);padding:1px 6px;border-radius:4px;margin-left:6px">POTD</span>`:'';
+  const tierColor=p.conf>=80?'var(--gr)':p.conf>=70?'var(--ac)':p.conf>=60?'var(--am)':'var(--t3)';
+  const tierLabel=p.conf>=80?'STRONG PLAY':p.conf>=70?'LEAN':p.conf>=60?'INFO':'WEAK';
+  const tierBadge=`<span style="font-size:9px;font-weight:700;color:${tierColor};background:rgba(0,0,0,.25);border:1px solid ${tierColor}40;padding:1px 7px;border-radius:4px">${tierLabel}</span>`;
 
   const fhtml=(p.factors||[]).slice(0,3).map(f=>`<span class="fc${f.t==='neu'?' neu':''}">${f.l}</span>`).join('');
 
@@ -806,7 +806,7 @@ function pickCard(p){
     <div class="pc-hd">
       <div>
         <div class="pc-teams">${p.away} @ ${p.home}${potdBadge}</div>
-        <div class="pc-meta">${p.type.toUpperCase()} · ${p.gameTime||'TBD'}</div>
+        <div class="pc-meta">${tierBadge} · ${p.type.toUpperCase()} · ${p.gameTime||'TBD'}</div>
       </div>
       ${ring(p.conf)}
     </div>
@@ -923,14 +923,15 @@ function renderParlays(){
 }
 
 function genParlays(picks){
-  const el=picks.filter(p=>p.conf>=65).sort((a,b)=>b.conf-a.conf);
+  // Only use strong picks for parlays (70+), not just all picks
+  const el=picks.filter(p=>p.conf>=70).sort((a,b)=>b.conf-a.conf);
   function ng(legs){const g=legs.map(l=>`${l.away}-${l.home}`);return new Set(g).size===g.length;}
   function best(mn,mx,mc){
     const pool=el.filter(p=>p.conf>=mc);if(pool.length<mn)return null;
     const legs=[];for(const p of pool){if(legs.length>=mx)break;if(ng([...legs,p]))legs.push(p);}
     return legs.length>=mn?legs:null;
   }
-  return{b2:best(2,2,70),b3:best(3,3,68),b4:best(4,4,65)};
+  return{b2:best(2,2,72),b3:best(3,3,70),b4:best(4,4,70)};
 }
 
 function parlayCard(legs,title){
