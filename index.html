@@ -3,661 +3,676 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PitchEdge — MLB Pitcher Props · June 9, 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>PitchEdge 2.0 - MLB Pitcher Prop Intelligence</title>
 <style>
-  :root{--bg:#0a0d11;--surface:#111520;--surface2:#171d2b;--border:#1e2840;--text:#e8ecf5;--text-muted:#6b7898;--text-dim:#3d4f6e;--green:#00e676;--green-mid:rgba(0,230,118,0.15);--red:#ff3d5a;--red-dim:rgba(255,61,90,0.08);--yellow:#ffd600;--yellow-dim:rgba(255,214,0,0.08);--blue:#4d9fff;--pod:#ffd600;--pod-dim:rgba(255,214,0,0.10);}
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-  nav{position:sticky;top:0;z-index:100;background:rgba(10,13,17,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;}
-  .nav-logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:.05em;display:flex;align-items:center;gap:8px;}
-  .nav-logo span{color:var(--green);}
-  .nav-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
-  .nav-date{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-muted);}
-  main{max-width:1280px;margin:0 auto;padding:28px 24px;}
-  .page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:16px;}
-  .page-header h1{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;line-height:1;}
-  .page-header h1 em{font-style:normal;color:var(--green);}
-  .section-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;margin-top:32px;}
-  .section-header h2{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);}
-  .section-line{flex:1;height:1px;background:var(--border);}
-  .section-sub{font-size:12px;color:var(--text-muted);line-height:1.5;margin-bottom:16px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
-  .section-sub strong{color:var(--text);}
-  /* RULES BANNER */
-  .rules-banner{background:rgba(255,214,0,0.05);border:1px solid rgba(255,214,0,0.25);border-radius:10px;padding:14px 18px;margin-bottom:24px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .rule{font-size:12px;color:var(--text-muted);line-height:1.5;}
-  .rule strong{color:var(--yellow);display:block;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.04em;text-transform:uppercase;}
-  .results-strip{display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:8px;}
-  .result-cell{padding:16px;text-align:center;border-right:1px solid var(--border);}
-  .result-cell:last-child{border-right:none;}
-  .result-cell .val{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;display:block;line-height:1;}
-  .result-cell .lbl{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-top:5px;display:block;}
-  .result-cell.green .val{color:var(--green);}.result-cell.red .val{color:var(--red);}.result-cell.yellow .val{color:var(--yellow);}.result-cell.blue .val{color:var(--blue);}
-  /* POD */
-  .pod-card{background:linear-gradient(135deg,rgba(255,214,0,.06) 0%,var(--surface) 60%);border:1px solid rgba(255,214,0,.25);border-radius:16px;padding:24px 28px;position:relative;overflow:hidden;margin-top:8px;}
-  .pod-card::before{content:'';position:absolute;top:0;right:0;width:160px;height:160px;background:radial-gradient(ellipse at top right,rgba(255,214,0,.08),transparent 70%);pointer-events:none;}
-  .pod-label{display:inline-flex;align-items:center;gap:6px;background:var(--pod-dim);border:1px solid rgba(255,214,0,.3);color:var(--pod);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-bottom:14px;}
-  .pod-label::before{content:'★';font-size:10px;}
-  .pod-main{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-  .pod-pitcher{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;color:var(--text);line-height:1;}
-  .pod-matchup{font-size:14px;color:var(--text-muted);margin-top:4px;}
-  .pod-stats{display:flex;gap:20px;}
-  .pod-stat{text-align:center;}
-  .pod-stat .val{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;display:block;line-height:1;}
-  .pod-stat .lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-top:5px;display:block;}
-  .pod-stat.green .val{color:var(--green);}.pod-stat.pod .val{color:var(--pod);}
-  .pod-grade{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:10px;background:var(--pod-dim);border:2px solid rgba(255,214,0,.4);font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--pod);}
-  .pod-reasoning{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:13px;color:var(--text-muted);line-height:1.6;}
-  .pod-reasoning strong{color:var(--text);}
-  .pod-badges{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
-  .badge{display:inline-flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
-  .badge-k-over{background:rgba(0,230,118,.12);color:var(--green);border:1px solid rgba(0,230,118,.25);}
-  .badge-outs-over{background:rgba(77,159,255,.12);color:var(--blue);border:1px solid rgba(77,159,255,.25);}
-  .badge-outs-under{background:rgba(255,61,90,.12);color:var(--red);border:1px solid rgba(255,61,90,.25);}
-  .badge-pod{background:rgba(255,214,0,.12);color:var(--pod);border:1px solid rgba(255,214,0,.3);}
-  .badge-straight{background:rgba(0,230,118,.12);color:var(--green);border:1px solid rgba(0,230,118,.25);}
-  .badge-parlay{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.25);}
-  .badge-pass{background:rgba(107,120,152,.12);color:var(--text-muted);border:1px solid var(--border);}
-  .grade-a{background:rgba(0,230,118,.15);color:var(--green);border:1px solid rgba(0,230,118,.3);}
-  .grade-b{background:rgba(77,159,255,.15);color:var(--blue);border:1px solid rgba(77,159,255,.3);}
-  /* PICK CARDS */
-  .picks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
-  .pick-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;animation:fadeIn .4s ease both;}
-  .pick-card.straight-card{border-color:rgba(0,230,118,.2);}
-  .pick-card.result-win{border-color:rgba(0,230,118,.5);background:linear-gradient(135deg,rgba(0,230,118,.04),var(--surface));}
-  .pick-card.result-loss{border-color:rgba(255,61,90,.4);background:linear-gradient(135deg,rgba(255,61,90,.04),var(--surface));}
-  .pick-card.result-push{border-color:rgba(255,214,0,.3);background:linear-gradient(135deg,rgba(255,214,0,.04),var(--surface));}
-  .pick-card:nth-child(1){animation-delay:.05s}.pick-card:nth-child(2){animation-delay:.10s}.pick-card:nth-child(3){animation-delay:.15s}.pick-card:nth-child(4){animation-delay:.20s}
-  .pick-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
-  .pick-pitcher-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;line-height:1;color:var(--text);}
-  .pick-matchup{font-size:12px;color:var(--text-muted);margin-top:3px;}
-  .pick-sub{font-size:11px;color:var(--text-dim);margin-top:2px;}
-  .pick-grade-badge{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;flex-shrink:0;}
-  /* PROB BARS */
-  .prob-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-  .prob-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);flex:0 0 80px;}
-  .prob-bar-bg{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
-  .prob-bar-fill{height:100%;border-radius:4px;}
-  .prob-bar-fill.high{background:var(--green);}.prob-bar-fill.mid{background:var(--yellow);}
-  .prob-pct{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;flex:0 0 40px;text-align:right;}
-  .prob-pct.high{color:var(--green);}.prob-pct.mid{color:var(--yellow);}
-  .key-reason{border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--text-muted);line-height:1.5;}
-  .over-r{background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);}
-  .over-r strong{color:var(--green);}
-  .k-r{background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);}
-  .k-r strong{color:var(--green);}
-  .pick-stats-row{display:flex;margin-bottom:12px;background:var(--surface2);border-radius:8px;overflow:hidden;}
-  .pick-stat{flex:1;padding:9px 8px;text-align:center;border-right:1px solid var(--border);}
-  .pick-stat:last-child{border-right:none;}
-  .pick-stat .val{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;display:block;line-height:1;}
-  .pick-stat .lbl{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-dim);font-weight:600;margin-top:4px;display:block;}
-  .pick-stat .val.green{color:var(--green);}.pick-stat .val.yellow{color:var(--yellow);}
-  .pick-reasoning{font-size:12px;color:var(--text-muted);line-height:1.5;border-top:1px solid var(--border);padding-top:10px;margin-top:4px;}
-  .pick-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
-  .pick-badges{display:flex;gap:6px;flex-wrap:wrap;}
-  .pick-score{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}
-  .last5{display:flex;gap:3px;margin-top:5px;}
-  .l5-dot{width:16px;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;}
-  .l5-w{background:var(--green-mid);color:var(--green);}.l5-l{background:var(--red-dim);color:var(--red);}
-  .result-buttons{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
-  .result-btn{flex:1;padding:7px 4px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;color:var(--text-muted);}
-  .result-btn.btn-win{border-color:rgba(0,230,118,.3);color:var(--green);}
-  .result-btn.btn-win.active{background:rgba(0,230,118,.15);border-color:var(--green);}
-  .result-btn.btn-loss{border-color:rgba(255,61,90,.3);color:var(--red);}
-  .result-btn.btn-loss.active{background:rgba(255,61,90,.15);border-color:var(--red);}
-  .result-btn.btn-push{border-color:rgba(255,214,0,.3);color:var(--yellow);}
-  .result-btn.btn-push.active{background:rgba(255,214,0,.12);border-color:var(--yellow);}
-  .result-btn.btn-clear{border-color:var(--border);color:var(--text-dim);font-size:11px;}
-  /* PARLAY BUILDS */
-  .parlay-build{background:var(--surface);border:1px solid rgba(167,139,250,.3);border-radius:12px;padding:20px;margin-bottom:16px;}
-  .parlay-build-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
-  .parlay-build-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--text);}
-  .parlay-odds-block{text-align:right;}
-  .parlay-odds-val{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:#a78bfa;display:block;}
-  .parlay-odds-lbl{font-size:11px;color:var(--text-dim);display:block;margin-top:2px;}
-  .parlay-build-sub{font-size:12px;color:var(--text-muted);margin-bottom:14px;}
-  .parlay-legs{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
-  .parlay-leg{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);}
-  .parlay-leg-num{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);width:16px;flex-shrink:0;}
-  .parlay-leg-info{flex:1;}
-  .parlay-leg-pitcher{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
-  .parlay-leg-detail{font-size:11px;color:var(--text-muted);margin-top:2px;}
-  .parlay-leg-right{text-align:right;flex-shrink:0;}
-  .parlay-leg-odds{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--text-muted);}
-  .parlay-leg-prob{font-size:11px;color:var(--green);margin-top:2px;font-weight:600;}
-  .parlay-math{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:12px;overflow:hidden;}
-  .parlay-math-item{padding:10px 12px;text-align:center;border-right:1px solid var(--border);}
-  .parlay-math-item:last-child{border-right:none;}
-  .parlay-math-item .val{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;display:block;}
-  .parlay-math-item .lbl{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);font-weight:600;margin-top:3px;display:block;}
-  .parlay-note{font-size:12px;color:var(--text-muted);line-height:1.5;padding:10px 12px;background:rgba(167,139,250,0.05);border-radius:6px;border:1px solid rgba(167,139,250,0.15);}
-  .avoid-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;flex-wrap:wrap;}
-  .avoid-row .pitcher{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;flex:1;min-width:120px;}
-  .avoid-row .reason{font-size:12px;color:var(--text-muted);flex:2;}
-  .lines-table{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-  .lines-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr;padding:9px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
-  .lines-header div{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);text-align:center;}
-  .lines-header div:first-child{text-align:left;}
-  .lines-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr;padding:10px 16px;border-bottom:1px solid var(--border);align-items:center;}
-  .lines-row:last-child{border-bottom:none;}
-  .lines-row.grp{background:var(--surface2);padding:5px 16px;}
-  .lines-row.grp div{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);}
-  .ln{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;text-align:center;}
-  .ln.g{color:var(--green);}.ln.r{color:var(--red);}.ln.y{color:var(--yellow);}.ln.d{color:var(--text-dim);}
-  .pc{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--text);}
-  .pc .tm{font-size:11px;color:var(--text-dim);font-weight:400;display:block;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-  ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-  @media(max-width:768px){.picks-grid{grid-template-columns:1fr}.results-strip{grid-template-columns:repeat(3,1fr)}.pod-main{flex-direction:column}main{padding:20px 16px}.rules-banner{grid-template-columns:1fr}.parlay-math{grid-template-columns:repeat(2,1fr)}.lines-header,.lines-row{grid-template-columns:2fr 1fr 1fr 1fr 1fr}}
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+  :root{--bg:#080C14;--surface:#0D1521;--surface2:#111E2E;--border:#1A2A3E;--border2:#243548;--accent:#00D4FF;--accent2:#0099CC;--gold:#F5A623;--green:#00C47A;--red:#FF4560;--amber:#FFB547;--purple:#9B6DFF;--text:#E8F1F8;--text2:#8BA0B4;--text3:#4A6278;--mono:'JetBrains Mono',monospace;--sans:'Space Grotesk',sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,.015) 2px,rgba(0,212,255,.015) 4px);pointer-events:none;z-index:0}
+  .header{position:sticky;top:0;z-index:100;background:rgba(8,12,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:600;color:#000}
+  .logo-text{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.5px}.logo-text span{color:var(--accent)}
+  .header-right{display:flex;align-items:center;gap:8px}
+  .date-badge{font-family:var(--mono);font-size:11px;color:var(--text2);background:var(--surface);border:1px solid var(--border);padding:4px 10px;border-radius:4px}
+  .nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav-btn{background:none;border:none;color:var(--text3);font-family:var(--sans);font-size:13px;font-weight:500;padding:12px 16px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
+  .nav-btn:hover{color:var(--text2)}.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .nav-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#000;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;margin-left:6px;font-family:var(--mono)}
+  .main{max-width:1280px;margin:0 auto;padding:24px;position:relative;z-index:1}
+  .page{display:none}.page.active{display:block}
+  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media(max-width:900px){.grid-3,.grid-4{grid-template-columns:1fr 1fr}}
+  @media(max-width:600px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.main{padding:16px}}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .card-sm{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+  .card-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+  .card-value{font-size:28px;font-weight:700;font-family:var(--mono);color:var(--text);line-height:1}
+  .card-sub{font-size:12px;color:var(--text2);margin-top:4px}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .section-title{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+  .section-title::before{content:'';display:block;width:3px;height:16px;background:var(--accent);border-radius:2px}
+  .pick-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color .15s;position:relative;overflow:hidden}
+  .pick-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+  .pick-card.over::before{background:var(--green)}.pick-card.under::before{background:var(--red)}
+  .pick-card:hover{border-color:var(--border2)}
+  .pick-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+  .pick-pitcher{font-size:17px;font-weight:700;color:var(--text);line-height:1.2}
+  .pick-matchup{font-size:12px;color:var(--text2);margin-top:2px;font-family:var(--mono)}
+  .confidence-badge{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .confidence-ring{width:48px;height:48px;position:relative}
+  .confidence-ring svg{transform:rotate(-90deg);width:48px;height:48px}
+  .confidence-ring .track{fill:none;stroke:var(--border2);stroke-width:3}
+  .confidence-ring .fill{fill:none;stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+  .confidence-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700}
+  .pick-market{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .market-tag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2)}
+  .direction-tag{font-size:13px;font-weight:700;font-family:var(--mono);padding:3px 10px;border-radius:4px}
+  .direction-tag.over{background:rgba(0,196,122,.15);color:var(--green)}.direction-tag.under{background:rgba(255,69,96,.15);color:var(--red)}
+  .line-display{font-size:22px;font-weight:700;font-family:var(--mono);color:var(--text)}
+  .pick-reason{font-size:12px;color:var(--text2);line-height:1.5;padding:10px;background:var(--surface2);border-radius:6px;border-left:2px solid var(--accent);margin-top:10px}
+  .flags-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .flag-pill{font-size:10px;font-weight:600;padding:3px 8px;border-radius:100px;letter-spacing:.04em}
+  .flag-pill.boost{background:rgba(245,166,35,.15);color:var(--gold);border:1px solid rgba(245,166,35,.3)}
+  .flag-pill.warning{background:rgba(255,69,96,.12);color:var(--red);border:1px solid rgba(255,69,96,.25)}
+  .flag-pill.info{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2)}
+  .type-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;font-size:12px;font-weight:800;font-family:var(--mono)}
+  .type-a{background:rgba(0,196,122,.2);color:var(--green);border:1px solid rgba(0,196,122,.4)}
+  .type-b{background:rgba(0,212,255,.15);color:var(--accent);border:1px solid rgba(0,212,255,.3)}
+  .type-c{background:rgba(255,181,71,.15);color:var(--amber);border:1px solid rgba(255,181,71,.3)}
+  .type-d{background:rgba(74,98,120,.3);color:var(--text3);border:1px solid var(--border2)}
+  .potd-card{background:linear-gradient(135deg,#0D1F35,#0A1828);border:1px solid rgba(0,212,255,.25);border-radius:16px;padding:28px;position:relative;overflow:hidden;margin-bottom:28px}
+  .potd-card::after{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(0,212,255,.08) 0%,transparent 70%);pointer-events:none}
+  .potd-eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .potd-eyebrow::before{content:'';display:block;width:18px;height:2px;background:var(--accent)}
+  .potd-pitcher{font-size:32px;font-weight:700;letter-spacing:-1px;color:var(--text);line-height:1;margin-bottom:4px}
+  .potd-detail{font-size:13px;color:var(--text2);font-family:var(--mono);margin-bottom:20px}
+  .potd-play{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .potd-market-block{display:flex;flex-direction:column;gap:4px}
+  .potd-market-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
+  .potd-market-val{font-size:22px;font-weight:700;font-family:var(--mono);color:var(--text)}
+  .potd-divider{width:1px;height:40px;background:var(--border2)}
+  .potd-confidence{font-size:42px;font-weight:800;font-family:var(--mono);color:var(--accent);line-height:1}
+  .potd-confidence-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
+  .stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+  @media(max-width:700px){.stats-strip{grid-template-columns:repeat(2,1fr)}}
+  .stat-block{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+  .stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:6px}
+  .stat-val{font-size:24px;font-weight:700;font-family:var(--mono)}
+  .stat-sub{font-size:11px;color:var(--text2);margin-top:2px}
+  .data-table{width:100%;border-collapse:collapse}
+  .data-table th{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+  .data-table td{padding:12px 14px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle}
+  .data-table tr:last-child td{border-bottom:none}
+  .data-table tr:hover td{background:rgba(255,255,255,.02)}
+  .data-table td.highlight{color:var(--text);font-weight:600}
+  .data-table td.mono{font-family:var(--mono)}
+  .result-badge{display:inline-flex;align-items:center;justify-content:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;font-family:var(--mono)}
+  .result-badge.win{background:rgba(0,196,122,.15);color:var(--green)}
+  .result-badge.loss{background:rgba(255,69,96,.15);color:var(--red)}
+  .result-badge.push{background:rgba(74,98,120,.3);color:var(--text3)}
+  .result-badge.pending{background:rgba(0,212,255,.1);color:var(--accent)}
+  .parlay-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
+  .parlay-header{background:var(--surface2);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+  .parlay-title{font-size:13px;font-weight:700;color:var(--text)}
+  .parlay-odds{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--gold)}
+  .parlay-leg{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border)}
+  .parlay-leg:last-child{border-bottom:none}
+  .parlay-leg-left{display:flex;flex-direction:column;gap:2px}
+  .parlay-leg-pitcher{font-size:14px;font-weight:600;color:var(--text)}
+  .parlay-leg-detail{font-size:11px;color:var(--text2);font-family:var(--mono)}
+  .parlay-leg-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+  .btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:#00b8d9}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-danger{background:rgba(255,69,96,.15);color:var(--red);border:1px solid rgba(255,69,96,.3)}.btn-danger:hover{background:rgba(255,69,96,.25)}
+  .btn-sm{padding:5px 12px;font-size:12px}
+  .form-group{margin-bottom:16px}
+  .form-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:.04em}
+  .form-input,.form-select,.form-textarea{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-family:var(--sans);font-size:14px;color:var(--text);outline:none;transition:border-color .15s}
+  .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent)}
+  .form-select option{background:var(--surface2)}
+  .form-textarea{resize:vertical;min-height:80px}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .admin-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:20px;overflow:hidden}
+  .admin-section-header{background:var(--surface2);border-bottom:1px solid var(--border);padding:14px 20px;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:space-between}
+  .admin-section-body{padding:20px}
+  .filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+  .filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;cursor:pointer;transition:all .15s}
+  .filter-btn:hover{border-color:var(--border2);color:var(--text)}
+  .filter-btn.active{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent)}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+  .empty-state .icon{font-size:40px;margin-bottom:12px}
+  .empty-state p{font-size:14px}
+  .pitcher-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .pitcher-row:last-child{border-bottom:none}
+  .pitcher-avatar{width:40px;height:40px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--text2);font-family:var(--mono);flex-shrink:0}
+  .pitcher-info{flex:1}
+  .pitcher-name{font-size:14px;font-weight:600;color:var(--text)}
+  .pitcher-team{font-size:11px;color:var(--text2);font-family:var(--mono)}
+  .pitcher-stats{display:flex;gap:20px}
+  .pitcher-stat{text-align:right}
+  .pitcher-stat-val{font-size:14px;font-weight:600;font-family:var(--mono);color:var(--text)}
+  .pitcher-stat-label{font-size:10px;color:var(--text3);text-transform:uppercase}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:28px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .modal-title{font-size:18px;font-weight:700}
+  .modal-close{background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+  .modal-close:hover{color:var(--text)}
+  .toast-container{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:8px}
+  .toast{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 18px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:10px;animation:slideIn .2s ease;max-width:320px}
+  .toast.success{border-left:3px solid var(--green)}.toast.error{border-left:3px solid var(--red)}.toast.info{border-left:3px solid var(--accent)}
+  @keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+  .loading{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .section-gap{margin-bottom:28px}
+  .coors-alert{background:rgba(255,69,96,.08);border:1px solid rgba(255,69,96,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .odds-badge{font-family:var(--mono);font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);padding:2px 7px;border-radius:4px}
+  .page-header{margin-bottom:24px}
+  .page-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
+  .page-subtitle{font-size:13px;color:var(--text2)}
+  .clv-positive{color:var(--green)}.clv-negative{color:var(--red)}.clv-neutral{color:var(--text2)}
 </style>
 </head>
 <body>
-<nav>
-  <div class="nav-logo"><div class="nav-dot"></div>PITCH<span>EDGE</span></div>
-  <div class="nav-date">Tue · Jun 9, 2026 · 13 Games</div>
+<header class="header">
+  <a class="logo" href="#" onclick="return false;">
+    <div class="logo-mark">PE</div>
+    <span class="logo-text">Pitch<span>Edge</span> <span style="font-size:12px;opacity:.5;font-weight:400;">2.0</span></span>
+  </a>
+  <div class="header-right">
+    <span class="date-badge" id="headerDate">--</span>
+    <button class="btn btn-secondary btn-sm" onclick="openModal('addPickModal')">+ Add Pick</button>
+  </div>
+</header>
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchPage('dashboard',this)">Dashboard</button>
+  <button class="nav-btn" onclick="switchPage('picks',this)">Today's Picks <span class="nav-badge" id="picksCount">0</span></button>
+  <button class="nav-btn" onclick="switchPage('potd',this)">Play of the Day</button>
+  <button class="nav-btn" onclick="switchPage('parlays',this)">Parlays</button>
+  <button class="nav-btn" onclick="switchPage('results',this)">Results</button>
+  <button class="nav-btn" onclick="switchPage('pitchers',this)">Pitchers</button>
+  <button class="nav-btn" onclick="switchPage('admin',this)">Admin</button>
 </nav>
+<main class="main">
 
-<main>
-  <div class="page-header">
-    <div>
-      <h1>June 9 <em>Pitcher Props</em></h1>
-      <div style="font-size:13px;color:var(--text-muted);margin-top:5px;">Lines verified from DraftKings · Probability-first framework</div>
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div id="potdBlock"></div>
+  <div class="stats-strip">
+    <div class="stat-block"><div class="stat-label">Today Record</div><div class="stat-val" id="statTodayRecord" style="color:var(--text)">0-0</div><div class="stat-sub" id="statTodayPending">0 pending</div></div>
+    <div class="stat-block"><div class="stat-label">Season Win %</div><div class="stat-val" id="statWinPct" style="color:var(--green)">--%</div><div class="stat-sub" id="statTotalRecord">0W - 0L</div></div>
+    <div class="stat-block"><div class="stat-label">Season ROI</div><div class="stat-val" id="statROI" style="color:var(--green)">0.0%</div><div class="stat-sub">flat $100/bet</div></div>
+    <div class="stat-block"><div class="stat-label">CLV+ Rate</div><div class="stat-val" id="statCLV" style="color:var(--accent)">--%</div><div class="stat-sub">beat close</div></div>
+  </div>
+  <div class="section-gap">
+    <div class="section-header"><div class="section-title">Today's Picks</div><button class="btn btn-secondary btn-sm" onclick="switchPage('picks',document.querySelectorAll('.nav-btn')[1])">View All</button></div>
+    <div id="dashPicksGrid" class="grid-2"></div>
+  </div>
+  <div class="section-gap">
+    <div class="section-header"><div class="section-title">Best Parlay</div><button class="btn btn-secondary btn-sm" onclick="switchPage('parlays',document.querySelectorAll('.nav-btn')[3])">All Parlays</button></div>
+    <div id="dashParlayBlock"></div>
+  </div>
+</div>
+
+<!-- PICKS -->
+<div class="page" id="page-picks">
+  <div class="page-header"><div class="page-title">Today's Picks</div><div class="page-subtitle" id="picksDate">--</div></div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterPicks('all',this)">All</button>
+    <button class="filter-btn" onclick="filterPicks('outs',this)">Outs Recorded</button>
+    <button class="filter-btn" onclick="filterPicks('strikeouts',this)">Strikeouts</button>
+    <button class="filter-btn" onclick="filterPicks('over',this)">Overs</button>
+    <button class="filter-btn" onclick="filterPicks('under',this)">Unders</button>
+    <button class="filter-btn" onclick="filterPicks('elite',this)">Elite 90+</button>
+    <button class="filter-btn" onclick="filterPicks('strong',this)">Strong 80+</button>
+  </div>
+  <div id="picksGrid" class="grid-2"></div>
+</div>
+
+<!-- POTD -->
+<div class="page" id="page-potd">
+  <div class="page-header"><div class="page-title">Play of the Day</div><div class="page-subtitle">Highest-confidence single play</div></div>
+  <div id="potdFullBlock"></div>
+</div>
+
+<!-- PARLAYS -->
+<div class="page" id="page-parlays">
+  <div class="page-header"><div class="page-title">Parlays</div><div class="page-subtitle">Auto-generated from today's qualifying picks</div></div>
+  <div id="parlaysBlock"></div>
+</div>
+
+<!-- RESULTS -->
+<div class="page" id="page-results">
+  <div class="page-header"><div class="page-title">Results Tracker</div><div class="page-subtitle">Historical performance with CLV tracking</div></div>
+  <div class="grid-4 section-gap">
+    <div class="card-sm"><div class="card-label">Total Picks</div><div class="card-value" id="rTotalPicks">0</div></div>
+    <div class="card-sm"><div class="card-label">Win %</div><div class="card-value" id="rWinPct" style="color:var(--green)">--%</div></div>
+    <div class="card-sm"><div class="card-label">ROI</div><div class="card-value" id="rROI">0.0%</div></div>
+    <div class="card-sm"><div class="card-label">CLV+ Rate</div><div class="card-value" id="rCLV" style="color:var(--accent)">--%</div></div>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterResults('all',this)">All Time</button>
+    <button class="filter-btn" onclick="filterResults('7d',this)">Last 7 Days</button>
+    <button class="filter-btn" onclick="filterResults('30d',this)">Last 30 Days</button>
+    <button class="filter-btn" onclick="filterResults('outs',this)">Outs Props</button>
+    <button class="filter-btn" onclick="filterResults('k',this)">K Props</button>
+    <button class="filter-btn" onclick="filterResults('under',this)">Unders Only</button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table class="data-table" id="resultsTable">
+    <thead><tr><th>Date</th><th>Pitcher</th><th>Market</th><th>Dir</th><th>Line</th><th>Conf</th><th>Open</th><th>Close</th><th>CLV</th><th>Result</th><th></th></tr></thead>
+    <tbody id="resultsBody"></tbody>
+  </table></div></div>
+</div>
+
+<!-- PITCHERS -->
+<div class="page" id="page-pitchers">
+  <div class="page-header"><div class="page-title">Pitcher Database</div><div class="page-subtitle">Classification and recent form</div></div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterPitchers('all',this)">All</button>
+    <button class="filter-btn" onclick="filterPitchers('A',this)">Type A</button>
+    <button class="filter-btn" onclick="filterPitchers('B',this)">Type B</button>
+    <button class="filter-btn" onclick="filterPitchers('C',this)">Type C</button>
+    <button class="filter-btn" onclick="filterPitchers('D',this)">Type D</button>
+  </div>
+  <div class="card" style="padding:0 20px;" id="pitchersList"></div>
+</div>
+
+<!-- ADMIN -->
+<div class="page" id="page-admin">
+  <div class="page-header"><div class="page-title">Admin Panel</div><div class="page-subtitle">Data entry, flags, odds refresh</div></div>
+  <div class="admin-section">
+    <div class="admin-section-header">Odds API (William Hill / Caesars) <button class="btn btn-primary btn-sm" onclick="refreshOdds()" id="refreshOddsBtn">Refresh Lines</button></div>
+    <div class="admin-section-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="oddsApiKey" type="text" placeholder="API key" value="7d78542b920b4293d6558f8d8ee00bf9"></div>
+        <div class="form-group"><label class="form-label">Sportsbook</label>
+          <select class="form-select" id="oddsBook">
+            <option value="williamhill_us">William Hill / Caesars</option>
+            <option value="draftkings">DraftKings</option>
+            <option value="fanduel">FanDuel</option>
+            <option value="betmgm">BetMGM</option>
+          </select>
+        </div>
+      </div>
+      <div id="oddsStatus" style="font-size:12px;color:var(--text2);"></div>
+      <div id="oddsResults" style="margin-top:12px;"></div>
     </div>
   </div>
-
-  <!-- RULES BANNER -->
-  <div class="rules-banner">
-    <div class="rule"><strong>Straight Bets</strong>Find plays where our probability estimate beats the break-even. Can be any odds — value is the gap between our estimate and what the book implies.</div>
-    <div class="rule"><strong>Parlays</strong>Choose the highest-probability legs available regardless of odds. A -150 leg hitting 60% beats a +120 leg hitting 48% every time. The math determines the legs, not the payout.</div>
-    <div class="rule"><strong>Coors Field</strong>Automatic pass on all props — K Over, Outs Over, Outs Under. No exceptions.</div>
-    <div class="rule"><strong>No Plus-Money Bias</strong>Plus money does not make a leg a better parlay ingredient. Probability does. These are separate considerations.</div>
+  <div class="admin-section">
+    <div class="admin-section-header">Pitcher Database <button class="btn btn-secondary btn-sm" onclick="openModal('addPitcherModal')">+ Add Pitcher</button></div>
+    <div class="admin-section-body"><div id="adminPitcherList"></div></div>
   </div>
-
-  <!-- SEASON RECORD -->
-  <div class="section-header" style="margin-top:0;"><h2>Season Record</h2><div class="section-line"></div></div>
-  <div class="results-strip">
-    <div class="result-cell"><span class="val" id="rec-total" style="color:var(--text);">0</span><span class="lbl">Total</span></div>
-    <div class="result-cell green"><span class="val" id="rec-wins">0</span><span class="lbl">Wins</span></div>
-    <div class="result-cell red"><span class="val" id="rec-losses">0</span><span class="lbl">Losses</span></div>
-    <div class="result-cell yellow"><span class="val" id="rec-pushes">0</span><span class="lbl">Pushes</span></div>
-    <div class="result-cell blue"><span class="val" id="rec-pct">--</span><span class="lbl">Win %</span></div>
+  <div class="admin-section">
+    <div class="admin-section-header">Enter Results <span style="font-size:11px;color:var(--text3)">Update pending picks</span></div>
+    <div class="admin-section-body"><div id="pendingPicksList"></div></div>
   </div>
-
-  <!-- POD -->
-  <div class="section-header"><h2>Play of the Day — Best Value Straight Bet</h2><div class="section-line"></div></div>
-  <div class="pod-card">
-    <div class="pod-label">Play of the Day</div>
-    <div class="pod-main">
-      <div>
-        <div class="pod-pitcher">Payton Tolle</div>
-        <div class="pod-matchup">BOS @ TB · 3:40 PM · Tropicana Field</div>
-        <div class="pod-badges" style="margin-top:10px;">
-          <span class="badge badge-outs-over">Outs Over 17.5 (+101)</span>
-          <span class="badge badge-pod">★ POD</span>
-          <span class="badge grade-a">A</span>
-        </div>
-      </div>
-      <div class="pod-stats">
-        <div class="pod-stat"><span class="val" style="color:var(--text-muted);font-size:11px;">LINE</span><span class="val" style="font-size:22px;color:var(--text);margin-top:4px;">17.5</span><span class="lbl">Outs Over</span></div>
-        <div class="pod-stat green"><span class="val" style="color:var(--text-muted);font-size:11px;">ODDS</span><span class="val" style="font-size:22px;margin-top:4px;">+101</span><span class="lbl">POD is value</span></div>
-        <div class="pod-stat pod"><span class="val" style="color:var(--text-muted);font-size:11px;">OUR EST</span><span class="val" style="font-size:22px;margin-top:4px;">~62%</span><span class="lbl">Probability</span></div>
-        <div class="pod-grade">A</div>
-      </div>
-    </div>
-    <div class="pod-reasoning">
-      <strong>Straight bet POD — not in parlays.</strong> Tolle goes 6+ IP in the majority of his 8 starts with a 2.28 ERA. The book has this priced at +101, meaning they imply a ~50% chance. We estimate ~62%. That +12 point gap is exceptional value for a standalone bet. However because it's priced near even money it's weaker as a parlay leg — a -136 line on the Under implies the book's own stronger probability read on that side. The POD is the standalone value play. Parlays use different legs.
+  <div class="admin-section">
+    <div class="admin-section-header" style="color:var(--red)">Danger Zone</div>
+    <div class="admin-section-body" style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-danger" onclick="clearTodayPicks()">Clear Today's Picks</button>
+      <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
     </div>
   </div>
-
-  <!-- STRAIGHT BET PICKS -->
-  <div class="section-header"><h2>Straight Bet Picks</h2><div class="section-line"></div></div>
-  <div class="section-sub"><strong>These are standalone value plays</strong> — priced incorrectly relative to our probability estimates. Play these individually at whatever unit size fits your bankroll.</div>
-  <div class="picks-grid">
-
-    <!-- TOLLE -->
-    <div class="pick-card straight-card" id="card-tolle">
-      <div class="pick-card-header">
-        <div>
-          <div class="pick-pitcher-name">Payton Tolle</div>
-          <div class="pick-matchup">BOS @ TB · 3:40 PM · road start</div>
-          <div class="pick-sub">LHP · BOS · 2.28 ERA · 0.97 WHIP · 51 Ks/47.1 IP · 8 starts</div>
-          <div class="last5"><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-l">L</div><div class="l5-dot l5-w">W</div></div>
-        </div>
-        <div class="pick-grade-badge grade-a">A</div>
-      </div>
-      <div class="key-reason over-r"><strong>Value:</strong> Book implies ~50% probability. We estimate ~62%. That's a +12 point edge. Tolle goes 6+ IP consistently — the 17.5 line requires only 5.2 IP which he clears in the vast majority of starts.</div>
-      <div class="prob-row">
-        <div class="prob-label">Our Est.</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:62%;"></div></div>
-        <div class="prob-pct high">62%</div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-label">Book Implies</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:49.8%;"></div></div>
-        <div class="prob-pct mid">49.8%</div>
-      </div>
-      <div class="pick-stats-row">
-        <div class="pick-stat"><span class="val">17.5</span><span class="lbl">Outs Line</span></div>
-        <div class="pick-stat"><span class="val green">+101</span><span class="lbl">Over Odds</span></div>
-        <div class="pick-stat"><span class="val green">+12.2%</span><span class="lbl">Value Edge</span></div>
-        <div class="pick-stat"><span class="val green">A</span><span class="lbl">Grade</span></div>
-      </div>
-      <div class="pick-reasoning">Straight bet only. Not in parlays — the near-even odds mean it contributes less probability mass than our high-confidence parlay legs.</div>
-      <div class="pick-footer">
-        <div class="pick-badges">
-          <span class="badge badge-outs-over">Outs Over 17.5</span>
-          <span class="badge badge-straight">Straight Bet</span>
-          <span class="badge badge-pod">POD</span>
-          <span id="status-tolle" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
-        </div>
-      </div>
-      <div class="result-buttons">
-        <button class="result-btn btn-win" onclick="setResult('tolle','win')">✓ Win</button>
-        <button class="result-btn btn-loss" onclick="setResult('tolle','loss')">✗ Loss</button>
-        <button class="result-btn btn-push" onclick="setResult('tolle','push')">— Push</button>
-        <button class="result-btn btn-clear" onclick="setResult('tolle','pending')">Clear</button>
-      </div>
-    </div>
-
-    <!-- SKENES straight bet -->
-    <div class="pick-card straight-card" id="card-skenes">
-      <div class="pick-card-header">
-        <div>
-          <div class="pick-pitcher-name">Paul Skenes</div>
-          <div class="pick-matchup">LAD @ PIT · 3:40 PM · PNC Park · home</div>
-          <div class="pick-sub">RHP · PIT · 9.86 K/9 · 1.50 BB/9 · last start 8 IP 10 Ks · NL Cy Young favorite</div>
-          <div class="last5"><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div></div>
-        </div>
-        <div class="pick-grade-badge grade-a">A</div>
-      </div>
-      <div class="key-reason k-r"><strong>Value + high probability:</strong> Skenes clears 6.5 Ks in ~68% of starts. Book implies ~52% at -110. That's a +16 point edge — the largest on the slate. Also goes in parlays as the highest-probability K prop available.</div>
-      <div class="prob-row">
-        <div class="prob-label">Our Est.</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:68%;"></div></div>
-        <div class="prob-pct high">68%</div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-label">Book Implies</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:52.4%;"></div></div>
-        <div class="prob-pct mid">52.4%</div>
-      </div>
-      <div class="pick-stats-row">
-        <div class="pick-stat"><span class="val">6.5</span><span class="lbl">K Line</span></div>
-        <div class="pick-stat"><span class="val yellow">-110</span><span class="lbl">K Over</span></div>
-        <div class="pick-stat"><span class="val green">+15.6%</span><span class="lbl">Value Edge</span></div>
-        <div class="pick-stat"><span class="val green">A</span><span class="lbl">Grade</span></div>
-      </div>
-      <div class="pick-reasoning">Both straight bet AND top parlay leg. Highest probability on the slate at ~68%. Plays in all three parlay builds below.</div>
-      <div class="pick-footer">
-        <div class="pick-badges">
-          <span class="badge badge-k-over">K Over 6.5</span>
-          <span class="badge badge-straight">Straight Bet</span>
-          <span class="badge badge-parlay">Parlay Anchor</span>
-          <span id="status-skenes" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
-        </div>
-      </div>
-      <div class="result-buttons">
-        <button class="result-btn btn-win" onclick="setResult('skenes','win')">✓ Win</button>
-        <button class="result-btn btn-loss" onclick="setResult('skenes','loss')">✗ Loss</button>
-        <button class="result-btn btn-push" onclick="setResult('skenes','push')">— Push</button>
-        <button class="result-btn btn-clear" onclick="setResult('skenes','pending')">Clear</button>
-      </div>
-    </div>
-
-    <!-- WHEELER straight bet -->
-    <div class="pick-card straight-card" id="card-wheeler">
-      <div class="pick-card-header">
-        <div>
-          <div class="pick-pitcher-name">Zack Wheeler</div>
-          <div class="pick-matchup">PHI @ TOR · 4:07 PM · Rogers Centre · road</div>
-          <div class="pick-sub">RHP · PHI · 2.31 ERA · 0.83 WHIP · 48:12 K:BB in 50.2 IP · 6.3 IP avg</div>
-          <div class="last5"><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-l">L</div></div>
-        </div>
-        <div class="pick-grade-badge grade-a">A</div>
-      </div>
-      <div class="key-reason k-r"><strong>High probability K prop:</strong> Wheeler K Over 5.5 at -145. Break-even 59.2%. Wheeler averages 8.6 K/9 — clearing 5.5 Ks requires only 5.8 Ks per 9 IP. Our estimate: ~65%. Also plays in parlays as a high-probability leg.</div>
-      <div class="prob-row">
-        <div class="prob-label">Our Est.</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:65%;"></div></div>
-        <div class="prob-pct high">65%</div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-label">Book Implies</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:59.2%;"></div></div>
-        <div class="prob-pct mid">59.2%</div>
-      </div>
-      <div class="pick-stats-row">
-        <div class="pick-stat"><span class="val">5.5</span><span class="lbl">K Line</span></div>
-        <div class="pick-stat"><span class="val yellow">-145</span><span class="lbl">K Over</span></div>
-        <div class="pick-stat"><span class="val green">+5.8%</span><span class="lbl">Value Edge</span></div>
-        <div class="pick-stat"><span class="val green">A</span><span class="lbl">Grade</span></div>
-      </div>
-      <div class="pick-reasoning">Good standalone and strong parlay leg. Moderate value edge (+5.8%) but high probability (~65%) makes it ideal for parlays. Wheeler's command means he goes deep and accumulates Ks efficiently.</div>
-      <div class="pick-footer">
-        <div class="pick-badges">
-          <span class="badge badge-k-over">K Over 5.5</span>
-          <span class="badge badge-straight">Straight Bet</span>
-          <span class="badge badge-parlay">Parlay Leg</span>
-          <span id="status-wheeler" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
-        </div>
-      </div>
-      <div class="result-buttons">
-        <button class="result-btn btn-win" onclick="setResult('wheeler','win')">✓ Win</button>
-        <button class="result-btn btn-loss" onclick="setResult('wheeler','loss')">✗ Loss</button>
-        <button class="result-btn btn-push" onclick="setResult('wheeler','push')">— Push</button>
-        <button class="result-btn btn-clear" onclick="setResult('wheeler','pending')">Clear</button>
-      </div>
-    </div>
-
-    <!-- PERALTA -->
-    <div class="pick-card straight-card" id="card-peralta">
-      <div class="pick-card-header">
-        <div>
-          <div class="pick-pitcher-name">Freddy Peralta</div>
-          <div class="pick-matchup">STL @ NYM · 4:10 PM · Citi Field · home</div>
-          <div class="pick-sub">RHP · NYM home · strong K rate · STL mid-tier K lineup</div>
-          <div class="last5"><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-w">W</div><div class="l5-dot l5-l">L</div><div class="l5-dot l5-w">W</div></div>
-        </div>
-        <div class="pick-grade-badge grade-b">B</div>
-      </div>
-      <div class="key-reason over-r"><strong>High probability:</strong> Peralta Outs Over 17.5 at -108. Break-even 51.9%. Peralta at home going 6+ IP is a ~58% probability. That's a +6.1 point edge with manageable juice at -108. Good parlay ingredient.</div>
-      <div class="prob-row">
-        <div class="prob-label">Our Est.</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill high" style="width:58%;"></div></div>
-        <div class="prob-pct high">58%</div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-label">Book Implies</div>
-        <div class="prob-bar-bg"><div class="prob-bar-fill mid" style="width:51.9%;"></div></div>
-        <div class="prob-pct mid">51.9%</div>
-      </div>
-      <div class="pick-stats-row">
-        <div class="pick-stat"><span class="val">17.5</span><span class="lbl">Outs Line</span></div>
-        <div class="pick-stat"><span class="val yellow">-108</span><span class="lbl">Over Odds</span></div>
-        <div class="pick-stat"><span class="val green">+6.1%</span><span class="lbl">Value Edge</span></div>
-        <div class="pick-stat"><span class="val blue">B</span><span class="lbl">Grade</span></div>
-      </div>
-      <div class="pick-reasoning">Best as a parlay leg — juice is light and probability is solid. At home vs STL which is a mid-K lineup that won't run up pitch counts quickly. Peralta has been consistent going deep this season.</div>
-      <div class="pick-footer">
-        <div class="pick-badges">
-          <span class="badge badge-outs-over">Outs Over 17.5</span>
-          <span class="badge badge-parlay">Parlay Leg</span>
-          <span id="status-peralta" class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,214,0,.2);">Pending</span>
-        </div>
-      </div>
-      <div class="result-buttons">
-        <button class="result-btn btn-win" onclick="setResult('peralta','win')">✓ Win</button>
-        <button class="result-btn btn-loss" onclick="setResult('peralta','loss')">✗ Loss</button>
-        <button class="result-btn btn-push" onclick="setResult('peralta','push')">— Push</button>
-        <button class="result-btn btn-clear" onclick="setResult('peralta','pending')">Clear</button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- PARLAY BUILDS — PROBABILITY FIRST -->
-  <div class="section-header"><h2>Parlay Builds — Highest Probability Legs</h2><div class="section-line"></div></div>
-  <div class="section-sub"><strong>Legs ranked strictly by probability to hit.</strong> Skenes (~68%) anchors every parlay. Wheeler (~65%) is leg 2. Peralta (~58%) is leg 3. Tolle is the standalone value play — its near-even money makes it a weaker parlay ingredient than the -108 to -145 legs below.</div>
-
-  <!-- 2-LEG -->
-  <div class="parlay-build">
-    <div class="parlay-build-header">
-      <div>
-        <div class="parlay-build-title">2-Leg Parlay</div>
-        <div class="parlay-build-sub">~44% combined probability · break-even ~31.3% · edge +12.7%</div>
-      </div>
-      <div class="parlay-odds-block">
-        <span class="parlay-odds-val">~+220</span>
-        <span class="parlay-odds-lbl">Est. payout</span>
-      </div>
-    </div>
-    <div class="parlay-legs">
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">01</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Paul Skenes · K Over 6.5</div>
-          <div class="parlay-leg-detail">LAD @ PIT · home · 9.86 K/9 · last start 10 Ks in 8 IP</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds">-110</div>
-          <div class="parlay-leg-prob">~68% prob</div>
-        </div>
-      </div>
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">02</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Zack Wheeler · K Over 5.5</div>
-          <div class="parlay-leg-detail">PHI @ TOR · 2.31 ERA · 8.6 K/9 · 5.5 line is a low bar</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds">-145</div>
-          <div class="parlay-leg-prob">~65% prob</div>
-        </div>
-      </div>
-    </div>
-    <div class="parlay-math">
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">~44%</span><span class="lbl">Hit Prob</span></div>
-      <div class="parlay-math-item"><span class="val">~31.3%</span><span class="lbl">Break-Even</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">+12.7%</span><span class="lbl">Edge</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:#a78bfa;">~+220</span><span class="lbl">Payout</span></div>
-    </div>
-    <div class="parlay-note">Best 2-leg ticket. Two highest-probability plays on the slate. Hits roughly 4 out of 9 times. The +12.7 edge means strong positive EV over volume. This is the recommended parlay today.</div>
-  </div>
-
-  <!-- 3-LEG -->
-  <div class="parlay-build">
-    <div class="parlay-build-header">
-      <div>
-        <div class="parlay-build-title">3-Leg Parlay</div>
-        <div class="parlay-build-sub">~26% combined probability · break-even ~21.7% · edge +4.3%</div>
-      </div>
-      <div class="parlay-odds-block">
-        <span class="parlay-odds-val">~+360</span>
-        <span class="parlay-odds-lbl">Est. payout</span>
-      </div>
-    </div>
-    <div class="parlay-legs">
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">01</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Paul Skenes · K Over 6.5</div>
-          <div class="parlay-leg-detail">LAD @ PIT · ~68% probability</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds">-110</div>
-          <div class="parlay-leg-prob">~68%</div>
-        </div>
-      </div>
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">02</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Zack Wheeler · K Over 5.5</div>
-          <div class="parlay-leg-detail">PHI @ TOR · ~65% probability</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds">-145</div>
-          <div class="parlay-leg-prob">~65%</div>
-        </div>
-      </div>
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">03</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Freddy Peralta · Outs Over 17.5</div>
-          <div class="parlay-leg-detail">STL @ NYM · Citi Field home · ~58% probability</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds">-108</div>
-          <div class="parlay-leg-prob">~58%</div>
-        </div>
-      </div>
-    </div>
-    <div class="parlay-math">
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">~26%</span><span class="lbl">Hit Prob</span></div>
-      <div class="parlay-math-item"><span class="val">~21.7%</span><span class="lbl">Break-Even</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:var(--green);">+4.3%</span><span class="lbl">Edge</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:#a78bfa;">~+360</span><span class="lbl">Payout</span></div>
-    </div>
-    <div class="parlay-note">Hits roughly 1 in 4 times. +4.3 edge above break-even. All three legs are high-probability plays at manageable juice. Note: payout is modest at +360 because the legs are all favorites — that's by design. We're building to hit, not to get rich on one ticket.</div>
-  </div>
-
-  <!-- 4-LEG -->
-  <div class="parlay-build">
-    <div class="parlay-build-header">
-      <div>
-        <div class="parlay-build-title">4-Leg Parlay</div>
-        <div class="parlay-build-sub">~15% combined probability · break-even ~16.7% · slight negative edge</div>
-      </div>
-      <div class="parlay-odds-block">
-        <span class="parlay-odds-val">~+500</span>
-        <span class="parlay-odds-lbl">Est. payout</span>
-      </div>
-    </div>
-    <div class="parlay-legs">
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">01</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Paul Skenes · K Over 6.5</div>
-          <div class="parlay-leg-detail">LAD @ PIT · ~68%</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds">-110</div>
-          <div class="parlay-leg-prob">~68%</div>
-        </div>
-      </div>
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">02</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Zack Wheeler · K Over 5.5</div>
-          <div class="parlay-leg-detail">PHI @ TOR · ~65%</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds">-145</div>
-          <div class="parlay-leg-prob">~65%</div>
-        </div>
-      </div>
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">03</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Freddy Peralta · Outs Over 17.5</div>
-          <div class="parlay-leg-detail">STL @ NYM · ~58%</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds">-108</div>
-          <div class="parlay-leg-prob">~58%</div>
-        </div>
-      </div>
-      <div class="parlay-leg">
-        <div class="parlay-leg-num">04</div>
-        <div class="parlay-leg-info">
-          <div class="parlay-leg-pitcher">Payton Tolle · Outs Under 17.5</div>
-          <div class="parlay-leg-detail">BOS @ TB · Under at -136 = book's high-confidence side · ~57%</div>
-        </div>
-        <div class="parlay-leg-right">
-          <div class="parlay-leg-odds">-136</div>
-          <div class="parlay-leg-prob">~57%</div>
-        </div>
-      </div>
-    </div>
-    <div class="parlay-math">
-      <div class="parlay-math-item"><span class="val" style="color:var(--yellow);">~15%</span><span class="lbl">Hit Prob</span></div>
-      <div class="parlay-math-item"><span class="val">~16.7%</span><span class="lbl">Break-Even</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:var(--red);">-1.7%</span><span class="lbl">Edge</span></div>
-      <div class="parlay-math-item"><span class="val" style="color:#a78bfa;">~+500</span><span class="lbl">Payout</span></div>
-    </div>
-    <div class="parlay-note" style="border-color:rgba(255,214,0,.2);background:rgba(255,214,0,.04);">⚠ Slight negative edge at -1.7%. The 4th leg (Tolle Under -136) pushes the combined probability just below break-even. If you want 4 legs, swap leg 4 for another confirmed high-probability prop. Skip this parlay or play it small — the 3-leg is the better bet today.</div>
-  </div>
-
-  <!-- PASS -->
-  <div class="section-header"><h2>Pass</h2><div class="section-line"></div></div>
-  <div class="avoid-row"><div class="pitcher">CHC @ COL — all props</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">Coors Field</div><div class="reason">Auto pass. No exceptions regardless of line or odds.</div><span class="badge badge-pass">Coors</span></div>
-  <div class="avoid-row"><div class="pitcher">Chase Burns K 6.5 (-145)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">CIN @ SD</div><div class="reason">Book implies 59.2%. SD is a patient low-K lineup. Our estimate for Burns clearing 6.5 Ks vs SD is ~52% — book has the edge here. Pass.</div><span class="badge badge-pass">Pass</span></div>
-  <div class="avoid-row"><div class="pitcher">Gerrit Cole K 4.5 (-145)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">NYY @ CLE</div><div class="reason">Book implies 59.2%. Cole's K rate in 2026 doesn't support 60%+ probability of clearing 4.5 Ks. CLE is a mid-K lineup. No edge.</div><span class="badge badge-pass">Pass</span></div>
-  <div class="avoid-row"><div class="pitcher">Max Meyer Outs Over 17.5 (-160)</div><div style="font-size:11px;color:var(--text-dim);flex-shrink:0;">ARI @ MIA</div><div class="reason">Book implies 61.5%. Not enough 2026 data on Meyer to confidently project him going 6+ IP 62% of the time. Juice asks too much. Pass.</div><span class="badge badge-pass">Pass</span></div>
-
-  <!-- FULL LINES TABLE -->
-  <div class="section-header"><h2>Full Lines — Probability Reference</h2><div class="section-line"></div></div>
-  <div style="background:rgba(77,159,255,0.05);border:1px solid rgba(77,159,255,0.15);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--text-muted);margin-bottom:14px;"><strong style="color:var(--blue);">Est% vs BE%:</strong> When Est% exceeds BE%, there's value. When it's below, the book has the edge. Parlay legs are chosen from highest Est% regardless of whether they're favorites or underdogs.</div>
-  <div class="lines-table">
-    <div class="lines-header"><div>Pitcher · Game</div><div>K Line</div><div>K Over</div><div>Outs Line</div><div>Outs Over</div><div>Outs Under</div><div>Est% / BE%</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">3:40 PM · LAD @ PIT ⭐ SKENES — HIGHEST PROB ON SLATE</div></div>
-    <div class="lines-row"><div><div class="pc">P. Skenes <span class="tm">PIT home · LAD mid K rate</span></div></div><div class="ln">6.5</div><div class="ln y">-110</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln g">68% / 52.4%</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">3:40 PM · BOS @ TB ⭐ TOLLE — STANDALONE VALUE</div></div>
-    <div class="lines-row"><div><div class="pc">P. Tolle <span class="tm">BOS road · TB patient</span></div></div><div class="ln">5.5</div><div class="ln g">+100</div><div class="ln">17.5</div><div class="ln g">+101</div><div class="ln y">-136</div><div class="ln g">62% / 49.8% (Over)</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">3:40 PM · NYY @ CLE</div></div>
-    <div class="lines-row"><div><div class="pc">G. Cole <span class="tm">NYY road · CLE mid K</span></div></div><div class="ln">4.5</div><div class="ln y">-145</div><div class="ln">17.5</div><div class="ln y">-104</div><div class="ln y">-129</div><div class="ln r">52% / 59.2% (K)</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">4:07 PM · PHI @ TOR ⭐ WHEELER K OVER</div></div>
-    <div class="lines-row"><div><div class="pc">Z. Wheeler <span class="tm">PHI road · TOR mid K</span></div></div><div class="ln">5.5</div><div class="ln y">-145</div><div class="ln">18.5</div><div class="ln g">+119</div><div class="ln y">-159</div><div class="ln g">65% / 59.2% (K)</div></div>
-    <div class="lines-row"><div><div class="pc">D. Cease <span class="tm">TOR home · PHI mid K</span></div></div><div class="ln">6.5</div><div class="ln y">-130</div><div class="ln">15.5</div><div class="ln y">-103</div><div class="ln y">-130</div><div class="ln d">54% / 56.5% (K)</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">4:10 PM · STL @ NYM ⭐ PERALTA OUTS OVER</div></div>
-    <div class="lines-row"><div><div class="pc">F. Peralta <span class="tm">NYM home · STL mid K</span></div></div><div class="ln">5.5</div><div class="ln y">-145</div><div class="ln">17.5</div><div class="ln y">-108</div><div class="ln y">-127</div><div class="ln g">58% / 51.9% (Outs)</div></div>
-    <div class="lines-row"><div><div class="pc">D. May <span class="tm">STL road · NYM mid K</span></div></div><div class="ln">4.5</div><div class="ln y">-154</div><div class="ln">16.5</div><div class="ln y">-129</div><div class="ln y">-105</div><div class="ln r">45% / 60.6% (K)</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">4:40 PM · TEX @ KC</div></div>
-    <div class="lines-row"><div><div class="pc">N. Eovaldi <span class="tm">TEX road · KC high K</span></div></div><div class="ln">5.5</div><div class="ln g">+111</div><div class="ln">18.5</div><div class="ln g">+118</div><div class="ln y">-157</div><div class="ln d">56% / 45.8% (Outs)</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">4:40 PM · ATL @ CWS</div></div>
-    <div class="lines-row"><div><div class="pc">G. Holmes <span class="tm">ATL road · CWS top-5 K</span></div></div><div class="ln">4.5</div><div class="ln y">-135</div><div class="ln">15.5</div><div class="ln y">-103</div><div class="ln y">-130</div><div class="ln d">50% / 57.5% (K)</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">5:40 PM · CHC @ COL — ⚠ COORS AUTO PASS</div></div>
-    <div class="lines-row"><div><div class="pc">C. Rea / T. Sugano <span class="tm">Coors Field</span></div></div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln d">—</div><div class="ln r">Coors Pass</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">6:38 PM · HOU @ LAA</div></div>
-    <div class="lines-row"><div><div class="pc">K-W Teng <span class="tm">HOU road · LAA high K</span></div></div><div class="ln">4.5</div><div class="ln y">-138</div><div class="ln">14.5</div><div class="ln y">-190</div><div class="ln g">+139</div><div class="ln d">50% / 58% (K)</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">6:40 PM · CIN @ SD</div></div>
-    <div class="lines-row"><div><div class="pc">C. Burns <span class="tm">CIN road · SD low K</span></div></div><div class="ln">6.5</div><div class="ln y">-145</div><div class="ln">17.5</div><div class="ln y">-160</div><div class="ln g">+112</div><div class="ln r">52% / 59.2% (K)</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">6:45 PM · WSH @ SF</div></div>
-    <div class="lines-row"><div><div class="pc">A. Houser <span class="tm">SF home · WSH high K</span></div></div><div class="ln">3.5</div><div class="ln y">-117</div><div class="ln">15.5</div><div class="ln y">-109</div><div class="ln y">-122</div><div class="ln d">50% / 53.9% (K)</div></div>
-
-    <div class="lines-row grp"><div style="grid-column:1/-1;">7:05 PM · MIL @ ATH</div></div>
-    <div class="lines-row"><div><div class="pc">R. Gasser <span class="tm">MIL road · ATH high K</span></div></div><div class="ln">4.5</div><div class="ln g">+105</div><div class="ln">14.5</div><div class="ln y">-129</div><div class="ln y">-104</div><div class="ln d">45% / 48.8%</div></div>
-
-  </div>
-
-  <div style="margin-top:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-dim);line-height:1.7;">
-    <strong style="color:var(--text-muted);">Est% vs BE%:</strong> Est% = our probability estimate. BE% = break-even implied by the odds. Green = value (Est exceeds BE). Red = no value (BE exceeds Est). Parlay legs ranked by Est% — Skenes 68%, Wheeler 65%, Peralta 58%. All lines from your DK screenshots.
-  </div>
+</div>
 
 </main>
+
+<!-- ADD PICK MODAL -->
+<div class="modal-overlay" id="addPickModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Pick</div><button class="modal-close" onclick="closeModal('addPickModal')">&#x2715;</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Pitcher Name *</label><input class="form-input" id="pickPitcher" placeholder="e.g. Zack Wheeler" list="pitcherSuggestions"><datalist id="pitcherSuggestions"></datalist></div>
+      <div class="form-group"><label class="form-label">Team</label><input class="form-input" id="pickTeam" placeholder="PHI"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Opponent</label><input class="form-input" id="pickOpponent" placeholder="vs NYM"></div>
+      <div class="form-group"><label class="form-label">Game Time</label><input class="form-input" id="pickTime" placeholder="7:05 PM ET"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Market *</label><select class="form-select" id="pickMarket"><option value="outs">Outs Recorded</option><option value="strikeouts">Strikeouts</option></select></div>
+      <div class="form-group"><label class="form-label">Direction *</label><select class="form-select" id="pickDirection"><option value="under">UNDER</option><option value="over">OVER</option></select></div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group"><label class="form-label">Line *</label><input class="form-input" id="pickLine" type="number" step="0.5" placeholder="15.5"></div>
+      <div class="form-group"><label class="form-label">Opening Line</label><input class="form-input" id="pickOpenLine" type="number" step="0.5" placeholder="16"></div>
+      <div class="form-group"><label class="form-label">Confidence *</label><input class="form-input" id="pickConfidence" type="number" min="0" max="100" placeholder="82"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Key Reason</label><textarea class="form-textarea" id="pickReason" placeholder="e.g. Rookie, 8th career start. Org. 75-pitch limit confirmed. Book at 15.5 outs."></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Active Flags</label>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="flagRookie"> Rookie (+7)</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="flagPiggyback"> Piggyback (+6)</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="flagInjuryReturn"> Injury Return (+5)</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="flagPitchLimit"> Pitch Limit (+8)</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="flagHighPitchCount"> High Recent PC (+5)</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="flagPatientOpp"> Patient Opp (+4)</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="flagBullpenFresh"> Tired Bullpen (+3)</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="flagCoors"> Coors Field (PASS)</label>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Pitcher Type</label><select class="form-select" id="pickType"><option value="A">Type A - K Over + Outs Over</option><option value="B">Type B - K Over + Outs Under</option><option value="C" selected>Type C - Outs Under Specialist</option><option value="D">Type D - Avoid</option></select></div>
+      <div class="form-group"><label class="form-label">Play of the Day?</label><select class="form-select" id="pickPOTD"><option value="no">No</option><option value="yes">Yes - Make this POTD</option></select></div>
+    </div>
+    <div id="coorsWarning" class="coors-alert" style="display:none">⚠️ COORS FIELD - Auto PASS. No props played at Coors.</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;">
+      <button class="btn btn-secondary" onclick="closeModal('addPickModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePick()">Save Pick</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PITCHER MODAL -->
+<div class="modal-overlay" id="addPitcherModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Pitcher</div><button class="modal-close" onclick="closeModal('addPitcherModal')">&#x2715;</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Name *</label><input class="form-input" id="dbPitcherName" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">Team *</label><input class="form-input" id="dbPitcherTeam" placeholder="PHI"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Throws</label><select class="form-select" id="dbPitcherThrows"><option value="R">Right</option><option value="L">Left</option></select></div>
+      <div class="form-group"><label class="form-label">Classification</label><select class="form-select" id="dbPitcherType"><option value="A">Type A</option><option value="B">Type B</option><option value="C">Type C</option><option value="D">Type D</option></select></div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group"><label class="form-label">K% (Season)</label><input class="form-input" id="dbPitcherKPct" type="number" step="0.1" placeholder="24.5"></div>
+      <div class="form-group"><label class="form-label">Avg Outs (L5)</label><input class="form-input" id="dbPitcherAvgOuts" type="number" step="0.5" placeholder="15.5"></div>
+      <div class="form-group"><label class="form-label">Avg PC (L5)</label><input class="form-input" id="dbPitcherAvgPC" type="number" placeholder="88"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Flags</label>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="dbFlagRookie"> Rookie</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="dbFlagInjury"> Injury Return</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="dbFlagPiggyback"> Piggyback</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)"><input type="checkbox" id="dbFlagPitchLimit"> Pitch Limit</label>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;">
+      <button class="btn btn-secondary" onclick="closeModal('addPitcherModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePitcher()">Save Pitcher</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="modal-overlay" id="resultModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Enter Result</div><button class="modal-close" onclick="closeModal('resultModal')">&#x2715;</button></div>
+    <div id="resultModalContent"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeModal('resultModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveResult()">Save Result</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
 <script>
-const PICKS=['tolle','skenes','wheeler','peralta'];
-const KEY='pitchedge_results_jun9_2026';
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
-function save(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
-function setResult(p,r){const d=load();d[p]=r;save(d);apply(d);record(d);}
-function apply(data){
-  PICKS.forEach(p=>{
-    const r=data[p]||'pending',card=document.getElementById('card-'+p),st=document.getElementById('status-'+p);
-    if(!card||!st)return;
-    card.classList.remove('result-win','result-loss','result-push');
-    card.querySelectorAll('.result-btn').forEach(b=>b.classList.remove('active'));
-    if(r==='win'){card.classList.add('result-win');st.textContent='✓ Win';st.style.cssText='background:rgba(0,230,118,.12);color:#00e676;border:1px solid rgba(0,230,118,.3);';const b=card.querySelector('.btn-win');if(b)b.classList.add('active');}
-    else if(r==='loss'){card.classList.add('result-loss');st.textContent='✗ Loss';st.style.cssText='background:rgba(255,61,90,.12);color:#ff3d5a;border:1px solid rgba(255,61,90,.3);';const b=card.querySelector('.btn-loss');if(b)b.classList.add('active');}
-    else if(r==='push'){card.classList.add('result-push');st.textContent='— Push';st.style.cssText='background:rgba(255,214,0,.12);color:#ffd600;border:1px solid rgba(255,214,0,.3);';const b=card.querySelector('.btn-push');if(b)b.classList.add('active');}
-    else{st.textContent='Pending';st.style.cssText='background:rgba(255,214,0,.08);color:#ffd600;border:1px solid rgba(255,214,0,.2).';}
-  });
+const SK={picks:'pe2_picks',pitchers:'pe2_pitchers',settings:'pe2_settings'};
+let st={picks:[],pitchers:[],settings:{oddsApiKey:'7d78542b920b4293d6558f8d8ee00bf9',oddsBook:'williamhill_us'},pickFilter:'all',resultFilter:'all',pitcherFilter:'all',editResultId:null};
+
+function save(){localStorage.setItem(SK.picks,JSON.stringify(st.picks));localStorage.setItem(SK.pitchers,JSON.stringify(st.pitchers));localStorage.setItem(SK.settings,JSON.stringify(st.settings));}
+function load(){try{const p=localStorage.getItem(SK.picks),pi=localStorage.getItem(SK.pitchers),s=localStorage.getItem(SK.settings);if(p)st.picks=JSON.parse(p);if(pi)st.pitchers=JSON.parse(pi);if(s)st.settings={...st.settings,...JSON.parse(s)};}catch(e){}}
+function todayStr(){return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function todayKey(){const d=new Date();return`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;}
+function todayPicks(){return st.picks.filter(p=>p.dateKey===todayKey());}
+
+function switchPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  renderPage(id);
 }
-function record(data){
-  let w=0,l=0,p=0;
-  PICKS.forEach(pk=>{const r=data[pk];if(r==='win')w++;else if(r==='loss')l++;else if(r==='push')p++;});
-  const t=w+l+p,pct=t>0?((w/Math.max(w+l,1))*100).toFixed(1)+'%':'--';
-  document.getElementById('rec-total').textContent=t;
-  document.getElementById('rec-wins').textContent=w;
-  document.getElementById('rec-losses').textContent=l;
-  document.getElementById('rec-pushes').textContent=p;
-  document.getElementById('rec-pct').textContent=pct;
+function renderPage(id){({dashboard:renderDash,picks:renderPicksPage,potd:renderPOTDPage,parlays:renderParlays,results:renderResults,pitchers:renderPitchers,admin:renderAdmin})[id]?.();}
+
+function confColor(s){return s>=90?'#00C47A':s>=80?'#00D4FF':s>=70?'#FFB547':s>=60?'#F5A623':'#4A6278';}
+function confLabel(s){return s>=90?'ELITE':s>=80?'STRONG':s>=70?'GOOD':s>=60?'EDGE':'PASS';}
+
+function ring(score){
+  const c=confColor(score),r=18,circ=2*Math.PI*r,off=circ-(score/100)*circ;
+  return`<div class="confidence-ring"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="${r}"/><circle class="fill" cx="24" cy="24" r="${r}" stroke="${c}" stroke-dasharray="${circ}" stroke-dashoffset="${off}"/></svg><div class="confidence-num" style="color:${c}">${score}</div></div>`;
 }
-const fills=document.querySelectorAll('.prob-bar-fill');
-const ws=[];fills.forEach(f=>{ws.push(f.style.width);f.style.width='0%';});
-requestAnimationFrame(()=>{setTimeout(()=>{fills.forEach((f,i)=>{f.style.width=ws[i];});},300);});
-const saved=load();apply(saved);record(saved);
+
+const FLAGS={rookie:{l:'Rookie',t:'boost',p:'+7'},piggyback:{l:'Piggyback',t:'boost',p:'+6'},injuryReturn:{l:'Inj.Return',t:'boost',p:'+5'},pitchLimit:{l:'PC Limit',t:'boost',p:'+8'},highPitchCount:{l:'High PC',t:'boost',p:'+5'},patientOpp:{l:'Patient Opp',t:'boost',p:'+4'},bullpenFresh:{l:'Tired BP',t:'boost',p:'+3'},coors:{l:'COORS',t:'warning',p:'PASS'}};
+function buildFlags(flags){if(!flags)return'';return Object.entries(flags).filter(([,v])=>v).map(([k])=>FLAGS[k]?`<span class="flag-pill ${FLAGS[k].t}">${FLAGS[k].l} ${FLAGS[k].p}</span>`:'').join('');}
+
+function pickCard(p){
+  const c=confColor(p.confidence),typeCls=`type-${(p.pitcherType||'C').toLowerCase()}`;
+  const rb=p.result!=='pending'?`<span class="result-badge ${p.result}">${p.result.toUpperCase()}</span>`:'';
+  const flags=buildFlags(p.flags);
+  return`<div class="pick-card ${p.direction}">
+    <div class="pick-header">
+      <div><div class="pick-pitcher"><span class="type-badge ${typeCls}">${p.pitcherType||'C'}</span> ${p.pitcher}</div><div class="pick-matchup">${p.team||''} ${p.opponent?'· '+p.opponent:''} ${p.gameTime?'· '+p.gameTime:''}</div></div>
+      <div>${ring(p.confidence)}</div>
+    </div>
+    <div class="pick-market"><span class="market-tag">${p.market==='outs'?'Outs Recorded':'Strikeouts'}</span><span class="direction-tag ${p.direction}">${p.direction.toUpperCase()}</span><span class="line-display">${p.line||'--'}</span>${p.openLine&&p.openLine!=p.line?`<span class="odds-badge">Open: ${p.openLine}</span>`:''} ${rb}</div>
+    ${p.reason?`<div class="pick-reason">${p.reason}</div>`:''}
+    ${flags?`<div class="flags-row">${flags}</div>`:''}
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:8px;"><button class="btn btn-secondary btn-sm" onclick="editPick('${p.id}')">Edit</button><button class="btn btn-danger btn-sm" onclick="deletePick('${p.id}')">Remove</button></div>
+  </div>`;
+}
+
+function renderDash(){
+  const today=todayPicks(),all=st.picks.filter(p=>p.result!=='pending');
+  const wins=all.filter(p=>p.result==='win').length,losses=all.filter(p=>p.result==='loss').length;
+  const tw=today.filter(p=>p.result==='win').length,tl=today.filter(p=>p.result==='loss').length,tp=today.filter(p=>p.result==='pending').length;
+  const wp=all.length?((wins/all.length)*100).toFixed(1):'--';
+  const roi=all.length?(((wins-losses)/all.length)*100*0.91).toFixed(1):'0.0';
+  const cp=all.filter(p=>p.closeLine!=null),cw=cp.filter(p=>p.direction==='under'?parseFloat(p.closeLine)>parseFloat(p.line):parseFloat(p.closeLine)<parseFloat(p.line)).length;
+  const clv=cp.length?((cw/cp.length)*100).toFixed(0):'--';
+  document.getElementById('statTodayRecord').textContent=`${tw}-${tl}`;
+  document.getElementById('statTodayPending').textContent=`${tp} pending`;
+  document.getElementById('statWinPct').textContent=`${wp}%`;
+  document.getElementById('statTotalRecord').textContent=`${wins}W - ${losses}L`;
+  const roiEl=document.getElementById('statROI');roiEl.textContent=`${roi>0?'+':''}${roi}%`;roiEl.style.color=roi>0?'var(--green)':roi<0?'var(--red)':'var(--text)';
+  document.getElementById('statCLV').textContent=`${clv}%`;
+  const potd=today.find(p=>p.isPOTD)||today.filter(p=>!p.flags?.coors).sort((a,b)=>b.confidence-a.confidence)[0];
+  const pb=document.getElementById('potdBlock');
+  if(potd){
+    const c=confColor(potd.confidence);
+    pb.innerHTML=`<div class="potd-card"><div class="potd-eyebrow">Play of the Day</div><div class="potd-pitcher">${potd.pitcher}</div><div class="potd-detail">${potd.team||''} ${potd.opponent?'· '+potd.opponent:''} ${potd.gameTime?'· '+potd.gameTime:''}</div><div class="potd-play"><div class="potd-market-block"><div class="potd-market-label">Market</div><div class="potd-market-val">${potd.market==='outs'?'Outs Recorded':'Strikeouts'}</div></div><div class="potd-divider"></div><div class="potd-market-block"><div class="potd-market-label">Play</div><div class="potd-market-val" style="color:${potd.direction==='under'?'var(--red)':'var(--green)'}">${potd.direction.toUpperCase()} ${potd.line}</div></div><div class="potd-divider"></div><div class="potd-market-block"><div class="potd-confidence-label">Confidence</div><div class="potd-confidence" style="color:${c}">${potd.confidence}</div></div><div class="potd-market-block"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:${c};padding:4px 12px;border-radius:6px;background:rgba(0,0,0,.3);border:1px solid ${c}30">${confLabel(potd.confidence)}</div></div></div>${potd.reason?`<div style="margin-top:16px;font-size:13px;color:var(--text2);line-height:1.6;padding:12px;background:rgba(0,0,0,.3);border-radius:8px;border-left:2px solid var(--accent)">${potd.reason}</div>`:''} ${buildFlags(potd.flags)?`<div class="flags-row" style="margin-top:12px;">${buildFlags(potd.flags)}</div>`:''}</div>`;
+  } else {
+    pb.innerHTML=`<div class="potd-card" style="text-align:center;padding:40px;"><div style="font-size:13px;color:var(--text3)">No picks yet. Use + Add Pick to get started.</div></div>`;
+  }
+  const top4=today.sort((a,b)=>b.confidence-a.confidence).slice(0,4);
+  document.getElementById('dashPicksGrid').innerHTML=top4.length?top4.map(pickCard).join(''):`<div class="empty-state" style="grid-column:1/-1"><div class="icon">⚾</div><p>No picks for today yet.</p></div>`;
+  const parlays=genParlays(today);
+  document.getElementById('dashParlayBlock').innerHTML=parlays.best2?parlayCard(parlays.best2,'Best 2-Leg Parlay'):`<div class="empty-state"><div class="icon">🎯</div><p>Need 2+ picks (72+ confidence, different games) for parlays.</p></div>`;
+}
+
+function renderPicksPage(){
+  updateCount();
+  document.getElementById('picksDate').textContent=todayStr();
+  filterPicks(st.pickFilter);
+}
+
+function filterPicks(f,btn){
+  st.pickFilter=f;
+  if(btn){document.querySelectorAll('#page-picks .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  let picks=todayPicks();
+  if(f==='outs')picks=picks.filter(p=>p.market==='outs');
+  if(f==='strikeouts')picks=picks.filter(p=>p.market==='strikeouts');
+  if(f==='over')picks=picks.filter(p=>p.direction==='over');
+  if(f==='under')picks=picks.filter(p=>p.direction==='under');
+  if(f==='elite')picks=picks.filter(p=>p.confidence>=90);
+  if(f==='strong')picks=picks.filter(p=>p.confidence>=80);
+  const sorted=picks.sort((a,b)=>b.confidence-a.confidence);
+  document.getElementById('picksGrid').innerHTML=sorted.length?sorted.map(pickCard).join(''):`<div class="empty-state" style="grid-column:1/-1"><div class="icon">⚾</div><p>No picks match this filter.</p></div>`;
+}
+
+function renderPOTDPage(){
+  const today=todayPicks(),potd=today.find(p=>p.isPOTD)||today.filter(p=>!p.flags?.coors).sort((a,b)=>b.confidence-a.confidence)[0];
+  const bl=document.getElementById('potdFullBlock');
+  if(!potd){bl.innerHTML=`<div class="empty-state"><div class="icon">🏆</div><p>No picks added yet.</p></div>`;return;}
+  const c=confColor(potd.confidence);
+  bl.innerHTML=`<div class="potd-card" style="margin-bottom:20px;"><div class="potd-eyebrow">Play of the Day · ${todayStr()}</div><div class="potd-pitcher">${potd.pitcher}</div><div class="potd-detail">${potd.team||''} ${potd.opponent?'· '+potd.opponent:''} ${potd.gameTime?'· '+potd.gameTime:''}</div><div class="potd-play"><div class="potd-market-block"><div class="potd-market-label">Market</div><div class="potd-market-val">${potd.market==='outs'?'Outs Recorded':'Strikeouts'}</div></div><div class="potd-divider"></div><div class="potd-market-block"><div class="potd-market-label">Direction</div><div class="potd-market-val" style="color:${potd.direction==='under'?'var(--red)':'var(--green)'}">${potd.direction.toUpperCase()}</div></div><div class="potd-divider"></div><div class="potd-market-block"><div class="potd-market-label">Line</div><div class="potd-market-val">${potd.line}</div></div><div class="potd-divider"></div><div class="potd-market-block"><div class="potd-confidence-label">Confidence</div><div class="potd-confidence" style="color:${c}">${potd.confidence}</div></div></div>${potd.reason?`<div style="margin-top:20px;font-size:14px;color:var(--text2);line-height:1.7;padding:16px;background:rgba(0,0,0,.3);border-radius:10px;border-left:3px solid var(--accent)">${potd.reason}</div>`:''} ${buildFlags(potd.flags)?`<div class="flags-row" style="margin-top:14px;">${buildFlags(potd.flags)}</div>`:''}</div>
+  <div class="grid-3"><div class="card-sm"><div class="card-label">Pitcher Type</div><div style="margin-top:6px;"><span class="type-badge type-${(potd.pitcherType||'C').toLowerCase()}" style="font-size:16px;width:36px;height:36px;">${potd.pitcherType||'C'}</span></div></div><div class="card-sm"><div class="card-label">Opening Line</div><div class="card-value">${potd.openLine||potd.line||'--'}</div></div><div class="card-sm"><div class="card-label">Current Line</div><div class="card-value">${potd.line||'--'}</div>${potd.openLine&&potd.openLine!=potd.line?`<div class="card-sub" style="color:var(--amber)">Moved from ${potd.openLine}</div>`:''}</div></div>`;
+}
+
+function genParlays(picks){
+  const el=picks.filter(p=>p.confidence>=65&&!p.flags?.coors).sort((a,b)=>b.confidence-a.confidence);
+  function ng(legs){const g=legs.map(l=>`${l.team}-${l.opponent}`);return new Set(g).size===g.length;}
+  function best(min,max,mc){const pool=el.filter(p=>p.confidence>=mc);if(pool.length<min)return null;const legs=[];for(const p of pool){if(legs.length>=max)break;if(ng([...legs,p]))legs.push(p);}return legs.length>=min?legs:null;}
+  return{best2:best(2,2,72),best3:best(3,3,70),best4:best(4,4,68)};
+}
+
+function calcOdds(legs){
+  let d=1;legs.forEach(()=>{d*=1.909;});
+  return'+'+(Math.round((d-1)*100));
+}
+
+function parlayCard(legs,title){
+  if(!legs||!legs.length)return'';
+  const odds=calcOdds(legs),avg=Math.round(legs.reduce((a,b)=>a+b.confidence,0)/legs.length);
+  return`<div class="parlay-card"><div class="parlay-header"><div><div class="parlay-title">${title}</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Avg conf: ${avg}</div></div><div class="parlay-odds">${odds}</div></div><div>${legs.map(l=>`<div class="parlay-leg"><div class="parlay-leg-left"><div class="parlay-leg-pitcher">${l.pitcher}</div><div class="parlay-leg-detail">${l.market==='outs'?'Outs':'Ks'} ${l.direction.toUpperCase()} ${l.line} · ${l.team||''} ${l.opponent?'· '+l.opponent:''}</div></div><div class="parlay-leg-right">${ring(l.confidence)}</div></div>`).join('')}</div></div>`;
+}
+
+function renderParlays(){
+  const{best2,best3,best4}=genParlays(todayPicks());
+  document.getElementById('parlaysBlock').innerHTML=[best2?parlayCard(best2,'Best 2-Leg Parlay'):'',best3?parlayCard(best3,'Best 3-Leg Parlay'):'',best4?parlayCard(best4,'Best 4-Leg Parlay'):''].join('')||`<div class="empty-state"><div class="icon">🎯</div><p>Add picks with confidence 68+ to generate parlays.</p></div>`;
+}
+
+function renderResults(){filterResults(st.resultFilter);}
+function filterResults(f,btn){
+  st.resultFilter=f;
+  if(btn){document.querySelectorAll('#page-results .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  let picks=st.picks.filter(p=>p.result!=='pending');
+  const now=new Date();
+  if(f==='7d')picks=picks.filter(p=>(now-new Date(p.dateKey))<=7*86400000);
+  if(f==='30d')picks=picks.filter(p=>(now-new Date(p.dateKey))<=30*86400000);
+  if(f==='outs')picks=picks.filter(p=>p.market==='outs');
+  if(f==='k')picks=picks.filter(p=>p.market==='strikeouts');
+  if(f==='under')picks=picks.filter(p=>p.direction==='under');
+  const w=picks.filter(p=>p.result==='win').length,l=picks.filter(p=>p.result==='loss').length;
+  const wp=picks.length?((w/(w+l||1))*100).toFixed(1):'--';
+  const roi=(w+l)>0?(((w-l)/(w+l))*100*0.909).toFixed(1):'0.0';
+  const cp=picks.filter(p=>p.closeLine!=null),cw=cp.filter(p=>p.direction==='under'?parseFloat(p.closeLine)>parseFloat(p.line):parseFloat(p.closeLine)<parseFloat(p.line)).length;
+  document.getElementById('rTotalPicks').textContent=picks.length;
+  const wpEl=document.getElementById('rWinPct');wpEl.textContent=`${wp}%`;wpEl.style.color=parseFloat(wp)>=55?'var(--green)':'var(--red)';
+  const roiEl=document.getElementById('rROI');roiEl.textContent=`${roi>0?'+':''}${roi}%`;roiEl.style.color=parseFloat(roi)>0?'var(--green)':parseFloat(roi)<0?'var(--red)':'var(--text)';
+  document.getElementById('rCLV').textContent=`${cp.length?((cw/cp.length)*100).toFixed(0):'--'}%`;
+  const sorted=[...picks].sort((a,b)=>new Date(b.dateKey)-new Date(a.dateKey));
+  document.getElementById('resultsBody').innerHTML=sorted.length?sorted.map(p=>{
+    const d=p.closeLine!=null?(p.direction==='under'?parseFloat(p.closeLine)-parseFloat(p.line):parseFloat(p.line)-parseFloat(p.closeLine)).toFixed(1):null;
+    const dc=d===null?'clv-neutral':parseFloat(d)>0?'clv-positive':'clv-negative';
+    return`<tr><td class="mono">${p.dateKey||'--'}</td><td class="highlight">${p.pitcher}</td><td>${p.market==='outs'?'Outs':'Ks'}</td><td><span class="direction-tag ${p.direction}" style="font-size:11px;">${p.direction.toUpperCase()}</span></td><td class="mono">${p.line}</td><td style="font-family:var(--mono);font-size:12px;color:${confColor(p.confidence)}">${p.confidence}</td><td class="mono">${p.openLine||'--'}</td><td class="mono">${p.closeLine||'--'}</td><td class="${dc} mono">${d!==null?(parseFloat(d)>0?'+':'')+d:'--'}</td><td><span class="result-badge ${p.result}">${p.result.toUpperCase()}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openResultEdit('${p.id}')">+CLV</button></td></tr>`;
+  }).join(''):`<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text3)">No results yet.</td></tr>`;
+}
+
+function renderPitchers(){filterPitchers(st.pitcherFilter);}
+function filterPitchers(f,btn){
+  st.pitcherFilter=f;
+  if(btn){document.querySelectorAll('#page-pitchers .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  let pitchers=f==='all'?st.pitchers:st.pitchers.filter(p=>p.type===f);
+  const list=document.getElementById('pitchersList');
+  if(!pitchers.length){list.innerHTML=`<div class="empty-state"><div class="icon">⚾</div><p>No pitchers added yet. Add in Admin.</p></div>`;return;}
+  list.innerHTML=pitchers.map(p=>{
+    const flags=[p.flagRookie?'<span class="flag-pill boost">Rookie</span>':'',p.flagInjury?'<span class="flag-pill boost">Inj.Ret.</span>':'',p.flagPiggyback?'<span class="flag-pill warning">Piggyback</span>':'',p.flagPitchLimit?'<span class="flag-pill boost">PC Limit</span>':''].filter(Boolean).join('');
+    return`<div class="pitcher-row"><div class="pitcher-avatar">${p.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div><div class="pitcher-info"><div class="pitcher-name">${p.name} <span class="type-badge type-${p.type?.toLowerCase()}">${p.type}</span></div><div class="pitcher-team">${p.team} · ${p.throws}HP</div>${flags?`<div class="flags-row" style="margin-top:6px;">${flags}</div>`:''}</div><div class="pitcher-stats"><div class="pitcher-stat"><div class="pitcher-stat-val">${p.kPct||'--'}%</div><div class="pitcher-stat-label">K%</div></div><div class="pitcher-stat"><div class="pitcher-stat-val">${p.avgOuts||'--'}</div><div class="pitcher-stat-label">Avg Outs</div></div><div class="pitcher-stat"><div class="pitcher-stat-val">${p.avgPC||'--'}</div><div class="pitcher-stat-label">Avg PC</div></div><button class="btn btn-danger btn-sm" onclick="deletePitcher('${p.id}')">Remove</button></div></div>`;
+  }).join('');
+}
+
+function renderAdmin(){
+  document.getElementById('oddsApiKey').value=st.settings.oddsApiKey;
+  document.getElementById('oddsBook').value=st.settings.oddsBook;
+  const pending=st.picks.filter(p=>p.result==='pending');
+  document.getElementById('pendingPicksList').innerHTML=pending.length?pending.map(p=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><div><div style="font-size:13px;font-weight:600;color:var(--text)">${p.pitcher}</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono)">${p.market==='outs'?'Outs':'Ks'} ${p.direction.toUpperCase()} ${p.line} · ${p.dateKey}</div></div><div style="display:flex;gap:8px;"><button class="btn btn-sm" style="background:rgba(0,196,122,.15);color:var(--green);border:1px solid rgba(0,196,122,.3)" onclick="qr('${p.id}','win')">Win</button><button class="btn btn-sm" style="background:rgba(255,69,96,.15);color:var(--red);border:1px solid rgba(255,69,96,.3)" onclick="qr('${p.id}','loss')">Loss</button><button class="btn btn-sm" style="background:rgba(74,98,120,.3);color:var(--text3);border:1px solid var(--border2)" onclick="qr('${p.id}','push')">Push</button><button class="btn btn-secondary btn-sm" onclick="openResultEdit('${p.id}')">+CLV</button></div></div>`).join(''):`<p style="font-size:13px;color:var(--text3)">All results entered.</p>`;
+  document.getElementById('adminPitcherList').innerHTML=st.pitchers.length?`<table class="data-table"><thead><tr><th>Name</th><th>Team</th><th>Type</th><th>Flags</th><th></th></tr></thead><tbody>${st.pitchers.map(p=>`<tr><td class="highlight">${p.name}</td><td class="mono">${p.team}</td><td><span class="type-badge type-${p.type?.toLowerCase()}">${p.type}</span></td><td style="font-size:11px;">${[p.flagRookie?'<span class="flag-pill boost" style="font-size:9px">Rookie</span>':'',p.flagInjury?'<span class="flag-pill boost" style="font-size:9px">Inj</span>':'',p.flagPiggyback?'<span class="flag-pill warning" style="font-size:9px">PB</span>':'',p.flagPitchLimit?'<span class="flag-pill boost" style="font-size:9px">PC</span>':''].filter(Boolean).join('')}</td><td><button class="btn btn-danger btn-sm" onclick="deletePitcher('${p.id}')">Remove</button></td></tr>`).join('')}</tbody></table>`:`<p style="font-size:13px;color:var(--text3)">No pitchers added yet.</p>`;
+}
+
+async function refreshOdds(){
+  const key=document.getElementById('oddsApiKey').value.trim(),book=document.getElementById('oddsBook').value;
+  st.settings.oddsApiKey=key;st.settings.oddsBook=book;save();
+  const btn=document.getElementById('refreshOddsBtn');btn.innerHTML='<span class="loading"></span> Fetching...';btn.disabled=true;
+  const statusEl=document.getElementById('oddsStatus'),resultsEl=document.getElementById('oddsResults');
+  statusEl.textContent='Connecting...';
+  try{
+    const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${key}&regions=us&markets=pitcher_strikeouts,pitcher_outs&bookmakers=${book}&oddsFormat=american`;
+    const res=await fetch(url);
+    if(!res.ok){const e=await res.json();throw new Error(e.message||`API error ${res.status}`);}
+    const data=await res.json();
+    const rem=res.headers.get('x-requests-remaining'),used=res.headers.get('x-requests-used');
+    statusEl.innerHTML=`<span style="color:var(--green)">✓ Connected</span> · ${rem} requests remaining (${used} used)`;
+    resultsEl.innerHTML=data.length?buildOddsTable(data,book):`<p style="font-size:13px;color:var(--text3)">No MLB pitcher props available right now.</p>`;
+    toast('Lines refreshed','success');
+  }catch(e){statusEl.innerHTML=`<span style="color:var(--red)">✗ ${e.message}</span>`;toast('API error: '+e.message,'error');}
+  btn.innerHTML='Refresh Lines';btn.disabled=false;
+}
+
+function buildOddsTable(games,book){
+  let rows='';
+  for(const g of games){
+    const bk=g.bookmakers?.find(b=>b.key===book)||g.bookmakers?.[0];if(!bk)continue;
+    for(const m of bk.markets||[]){
+      const grp={};for(const o of m.outcomes||[]){const n=o.description||o.name;if(!grp[n])grp[n]={};if(o.name==='Over')grp[n].over=o;if(o.name==='Under')grp[n].under=o;}
+      for(const[pitcher,s]of Object.entries(grp)){
+        const line=s.over?.point||s.under?.point||'--';
+        const oo=s.over?.price?(s.over.price>0?'+'+s.over.price:s.over.price):'--';
+        const uo=s.under?.price?(s.under.price>0?'+'+s.under.price:s.under.price):'--';
+        const coors=g.home_team?.includes('Rockies')?'⚠️ COORS':'';
+        rows+=`<tr><td style="font-size:11px">${g.away_team} @ ${g.home_team} ${coors}</td><td class="highlight">${pitcher}</td><td><span class="market-tag">${m.key==='pitcher_strikeouts'?'Ks':'Outs'}</span></td><td class="mono" style="color:var(--green)">${oo}</td><td class="mono" style="color:var(--red)">${uo}</td><td class="mono">${line}</td></tr>`;
+      }
+    }
+  }
+  return`<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Game</th><th>Pitcher</th><th>Market</th><th>Over</th><th>Under</th><th>Line</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function savePick(){
+  const pitcher=document.getElementById('pickPitcher').value.trim(),line=document.getElementById('pickLine').value,conf=parseInt(document.getElementById('pickConfidence').value);
+  if(!pitcher||!line||!conf){toast('Pitcher, line, confidence required','error');return;}
+  const flags={rookie:document.getElementById('flagRookie').checked,piggyback:document.getElementById('flagPiggyback').checked,injuryReturn:document.getElementById('flagInjuryReturn').checked,pitchLimit:document.getElementById('flagPitchLimit').checked,highPitchCount:document.getElementById('flagHighPitchCount').checked,patientOpp:document.getElementById('flagPatientOpp').checked,bullpenFresh:document.getElementById('flagBullpenFresh').checked,coors:document.getElementById('flagCoors').checked};
+  const isPOTD=document.getElementById('pickPOTD').value==='yes';
+  if(isPOTD)st.picks.filter(p=>p.dateKey===todayKey()).forEach(p=>p.isPOTD=false);
+  st.picks.push({id:'p'+Date.now(),pitcher,team:document.getElementById('pickTeam').value.trim().toUpperCase(),opponent:document.getElementById('pickOpponent').value.trim(),gameTime:document.getElementById('pickTime').value.trim(),market:document.getElementById('pickMarket').value,direction:document.getElementById('pickDirection').value,line:parseFloat(line),openLine:document.getElementById('pickOpenLine').value?parseFloat(document.getElementById('pickOpenLine').value):null,confidence:conf,reason:document.getElementById('pickReason').value.trim(),flags,pitcherType:document.getElementById('pickType').value,isPOTD,result:'pending',dateKey:todayKey(),closeLine:null,createdAt:new Date().toISOString()});
+  save();closeModal('addPickModal');clearPickForm();toast(`${pitcher} ${document.getElementById('pickDirection').value.toUpperCase()} ${line} added`,'success');updateCount();renderDash();
+}
+
+function clearPickForm(){
+  ['pickPitcher','pickTeam','pickOpponent','pickTime','pickLine','pickOpenLine','pickConfidence','pickReason'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pickMarket').value='outs';document.getElementById('pickDirection').value='under';document.getElementById('pickType').value='C';document.getElementById('pickPOTD').value='no';
+  ['flagRookie','flagPiggyback','flagInjuryReturn','flagPitchLimit','flagHighPitchCount','flagPatientOpp','flagBullpenFresh','flagCoors'].forEach(id=>document.getElementById(id).checked=false);
+  document.getElementById('coorsWarning').style.display='none';
+}
+
+function editPick(id){
+  const p=st.picks.find(x=>x.id===id);if(!p)return;
+  document.getElementById('pickPitcher').value=p.pitcher;document.getElementById('pickTeam').value=p.team||'';document.getElementById('pickOpponent').value=p.opponent||'';document.getElementById('pickTime').value=p.gameTime||'';document.getElementById('pickMarket').value=p.market;document.getElementById('pickDirection').value=p.direction;document.getElementById('pickLine').value=p.line;document.getElementById('pickOpenLine').value=p.openLine||'';document.getElementById('pickConfidence').value=p.confidence;document.getElementById('pickReason').value=p.reason||'';document.getElementById('pickType').value=p.pitcherType||'C';document.getElementById('pickPOTD').value=p.isPOTD?'yes':'no';
+  if(p.flags)Object.entries(p.flags).forEach(([k,v])=>{const el=document.getElementById('flag'+k.charAt(0).toUpperCase()+k.slice(1));if(el)el.checked=v;});
+  st.picks=st.picks.filter(x=>x.id!==id);save();openModal('addPickModal');
+}
+
+function deletePick(id){st.picks=st.picks.filter(p=>p.id!==id);save();updateCount();toast('Pick removed','info');renderPage(document.querySelector('.page.active').id.replace('page-',''));}
+
+function qr(id,result){const p=st.picks.find(x=>x.id===id);if(!p)return;p.result=result;save();toast(`${p.pitcher}: ${result.toUpperCase()}`,'success');renderAdmin();renderDash();}
+
+function openResultEdit(id){
+  st.editResultId=id;const p=st.picks.find(x=>x.id===id);if(!p)return;
+  document.getElementById('resultModalContent').innerHTML=`<div style="margin-bottom:16px;padding:12px;background:var(--surface2);border-radius:8px;"><div style="font-size:15px;font-weight:600;color:var(--text)">${p.pitcher}</div><div style="font-size:12px;color:var(--text2);font-family:var(--mono)">${p.market==='outs'?'Outs':'Ks'} ${p.direction.toUpperCase()} ${p.line}</div></div><div class="form-group"><label class="form-label">Result</label><select class="form-select" id="resultSelect"><option value="pending" ${p.result==='pending'?'selected':''}>Pending</option><option value="win" ${p.result==='win'?'selected':''}>Win</option><option value="loss" ${p.result==='loss'?'selected':''}>Loss</option><option value="push" ${p.result==='push'?'selected':''}>Push</option></select></div><div class="form-group"><label class="form-label">Closing Line (for CLV tracking)</label><input class="form-input" id="resultCloseLine" type="number" step="0.5" placeholder="e.g. 16.5" value="${p.closeLine||''}"></div>`;
+  openModal('resultModal');
+}
+
+function saveResult(){
+  const p=st.picks.find(x=>x.id===st.editResultId);if(!p)return;
+  p.result=document.getElementById('resultSelect').value;const cl=document.getElementById('resultCloseLine').value;p.closeLine=cl?parseFloat(cl):null;
+  save();closeModal('resultModal');toast('Result saved','success');renderAdmin();renderResults();renderDash();
+}
+
+function savePitcher(){
+  const name=document.getElementById('dbPitcherName').value.trim(),team=document.getElementById('dbPitcherTeam').value.trim().toUpperCase();
+  if(!name||!team){toast('Name and team required','error');return;}
+  st.pitchers.push({id:'pi'+Date.now(),name,team,throws:document.getElementById('dbPitcherThrows').value,type:document.getElementById('dbPitcherType').value,kPct:document.getElementById('dbPitcherKPct').value||null,avgOuts:document.getElementById('dbPitcherAvgOuts').value||null,avgPC:document.getElementById('dbPitcherAvgPC').value||null,flagRookie:document.getElementById('dbFlagRookie').checked,flagInjury:document.getElementById('dbFlagInjury').checked,flagPiggyback:document.getElementById('dbFlagPiggyback').checked,flagPitchLimit:document.getElementById('dbFlagPitchLimit').checked});
+  save();closeModal('addPitcherModal');['dbPitcherName','dbPitcherTeam','dbPitcherKPct','dbPitcherAvgOuts','dbPitcherAvgPC'].forEach(id=>document.getElementById(id).value='');['dbFlagRookie','dbFlagInjury','dbFlagPiggyback','dbFlagPitchLimit'].forEach(id=>document.getElementById(id).checked=false);
+  toast(`${name} added`,'success');updateSuggestions();renderAdmin();
+}
+
+function deletePitcher(id){const p=st.pitchers.find(x=>x.id===id);st.pitchers=st.pitchers.filter(x=>x.id!==id);save();toast(`${p?.name} removed`,'info');renderAdmin();renderPitchers();}
+function updateSuggestions(){document.getElementById('pitcherSuggestions').innerHTML=st.pitchers.map(p=>`<option value="${p.name}">`).join('');}
+function clearTodayPicks(){if(!confirm('Clear today\'s picks?'))return;st.picks=st.picks.filter(p=>p.dateKey!==todayKey());save();updateCount();toast('Cleared','info');renderDash();}
+function clearAllData(){if(!confirm('Clear ALL data?'))return;st.picks=[];st.pitchers=[];save();updateCount();toast('All data cleared','info');renderDash();}
+function openModal(id){document.getElementById(id).classList.add('open');if(id==='addPickModal')updateSuggestions();}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toast(msg,type='info'){const tc=document.getElementById('toastContainer'),t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span style="font-family:var(--mono);font-weight:700">${type==='success'?'✓':type==='error'?'✗':'i'}</span> ${msg}`;tc.appendChild(t);setTimeout(()=>t.remove(),3500);}
+function updateCount(){document.getElementById('picksCount').textContent=todayPicks().length;}
+
+document.addEventListener('change',e=>{if(e.target.id==='flagCoors')document.getElementById('coorsWarning').style.display=e.target.checked?'flex':'none';});
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+function init(){load();document.getElementById('headerDate').textContent=todayStr();document.getElementById('picksDate').textContent=todayStr();updateCount();updateSuggestions();renderDash();}
+init();
 </script>
 </body>
 </html>
