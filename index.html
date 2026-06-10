@@ -297,6 +297,7 @@ const TEAMS = {
   'Cincinnati Reds':        {w:32,l:34,rsg:4.27,rag:5.08,rd:-53,lg:'NL'},
   'Miami Marlins':          {w:32,l:35,rsg:4.27,rag:4.51,rd:-16,lg:'NL'},
   'Athletics':              {w:32,l:35,rsg:4.39,rag:5.01,rd:-42,lg:'AL'},
+  'Oakland Athletics':      {w:32,l:35,rsg:4.39,rag:5.01,rd:-42,lg:'AL'},
   'Baltimore Orioles':      {w:31,l:37,rsg:4.66,rag:5.18,rd:-35,lg:'AL'},
   'Houston Astros':         {w:31,l:38,rsg:4.54,rag:5.07,rd:-37,lg:'AL'},
   'Minnesota Twins':        {w:30,l:38,rsg:4.59,rag:5.06,rd:-32,lg:'AL'},
@@ -457,9 +458,9 @@ async function runEngine(){
       const awayName=g.away_team;
       const homeName=g.home_team;
 
-      // Direct lookup from hardcoded table
-      const aT=TEAMS[awayName];
-      const hT=TEAMS[homeName];
+      // Direct lookup first, then fuzzy fallback
+      const aT=TEAMS[awayName]||Object.values(TEAMS).find(t=>awayName.includes(t.name?.split(' ').pop())||t.name?.includes(awayName.split(' ').pop()));
+      const hT=TEAMS[homeName]||Object.values(TEAMS).find(t=>homeName.includes(t.name?.split(' ').pop())||t.name?.includes(homeName.split(' ').pop()));
 
       if(!aT||!hT){
         // Show unmatched names so we can fix the lookup table
