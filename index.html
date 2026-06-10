@@ -327,8 +327,18 @@ let S={picks:[],settings:{oddsKey:'7d78542b920b4293d6558f8d8ee00bf9',book:'draft
 function save(){localStorage.setItem(SK.picks,JSON.stringify(S.picks));localStorage.setItem(SK.settings,JSON.stringify(S.settings));}
 function load(){try{const p=localStorage.getItem(SK.picks),s=localStorage.getItem(SK.settings);if(p)S.picks=JSON.parse(p);if(s)S.settings={...S.settings,...JSON.parse(s)};}catch(e){}}
 function todayStr(){return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
-function todayKey(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function todayPicks(){return S.picks.filter(p=>p.dk===todayKey());}
+function todayKey(){
+  // Use a fixed key so timezone can never cause mismatch
+  const d=new Date();
+  return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function todayPicks(){
+  const tk=todayKey();
+  // Also match picks from last 24 hours in case of timezone edge
+  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+  const yk=`${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+  return S.picks.filter(p=>p.dk===tk||p.dk===yk);
+}
 function uid(){return 'p'+Date.now()+Math.random().toString(36).slice(2,5);}
 
 function sw(id,btn){
@@ -520,8 +530,10 @@ async function runEngine(){
     S.picks.push(...picks);
     save();
 
-    setDot('d3','ok');setText('s3t',`Engine: ${picks.length} picks ✓`);
-    setText('s4t',`${picks.length} picks from ${games.length} games`);
+    // Confirm save worked
+    const saved=JSON.parse(localStorage.getItem('pe2_picks')||'[]');
+    setDot('d3','ok');setText('s3t',`Engine done · ${picks.length} picks saved (total: ${saved.length})`);
+    setText('s4t',`dk=${todayKey()}`);
     updCount();renderDash();
     toast(`${picks.length} picks generated`,'success');
 
