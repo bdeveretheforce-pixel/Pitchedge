@@ -461,7 +461,12 @@ async function runEngine(){
       const aT=TEAMS[awayName];
       const hT=TEAMS[homeName];
 
-      if(!aT||!hT) continue; // team not in our table (rare edge case)
+      if(!aT||!hT){
+        // Show unmatched names so we can fix the lookup table
+        const missed=document.getElementById('s4t');
+        if(missed) missed.textContent+=' MISS:'+((!aT)?awayName:'')+((!hT)?'/'+homeName:'');
+        continue;
+      }
 
       const isCoors=homeName==='Colorado Rockies';
       const gt=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
