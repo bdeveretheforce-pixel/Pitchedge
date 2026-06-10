@@ -579,16 +579,49 @@ async function refreshOdds(){
   st.settings.oddsApiKey=key;st.settings.oddsBook=book;save();
   const btn=document.getElementById('refreshOddsBtn');btn.innerHTML='<span class="loading"></span> Fetching...';btn.disabled=true;
   const statusEl=document.getElementById('oddsStatus'),resultsEl=document.getElementById('oddsResults');
-  statusEl.textContent='Connecting...';
+  statusEl.textContent='Step 1/2: Fetching today\'s MLB games...';
   try{
-    const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${key}&regions=us&markets=pitcher_strikeouts,pitcher_outs&bookmakers=${book}&oddsFormat=american`;
-    const res=await fetch(url);
-    if(!res.ok){const e=await res.json();throw new Error(e.message||`API error ${res.status}`);}
-    const data=await res.json();
-    const rem=res.headers.get('x-requests-remaining'),used=res.headers.get('x-requests-used');
-    statusEl.innerHTML=`<span style="color:var(--green)">✓ Connected</span> · ${rem} requests remaining (${used} used)`;
-    resultsEl.innerHTML=data.length?buildOddsTable(data,book):`<p style="font-size:13px;color:var(--text3)">No MLB pitcher props available right now.</p>`;
-    toast('Lines refreshed','success');
+    // Step 1: get today's events
+    const eventsUrl=`https://api.the-odds-api.com/v4/sports/baseball_mlb/events?apiKey=${key}`;
+    const evRes=await fetch(eventsUrl);
+    if(!evRes.ok){const e=await evRes.json();throw new Error(e.message||`Events API error ${evRes.status}`);}
+    const events=await evRes.json();
+    const rem1=evRes.headers.get('x-requests-remaining');
+    if(!events.length){statusEl.innerHTML=`<span style="color:var(--amber)">No MLB games found today.</span>`;btn.innerHTML='Refresh Lines';btn.disabled=false;return;}
+    statusEl.textContent=`Step 2/2: Fetching pitcher props for ${events.length} games... (${rem1} requests remaining)`;
+
+    // Step 2: fetch player props for each event (batch up to 5 games to save requests)
+    const allRows=[];
+    const toFetch=events.slice(0,8); // cap at 8 games = 8 requests
+    for(const ev of toFetch){
+      try{
+        const propsUrl=`https://api.the-odds-api.com/v4/sports/baseball_mlb/events/${ev.id}/odds?apiKey=${key}&regions=us&markets=pitcher_strikeouts,pitcher_outs&bookmakers=${book}&oddsFormat=american`;
+        const pr=await fetch(propsUrl);
+        if(!pr.ok)continue;
+        const pd=await pr.json();
+        const rem=pr.headers.get('x-requests-remaining');
+        statusEl.textContent=`Fetching props... ${rem} requests remaining`;
+        const bk=pd.bookmakers?.find(b=>b.key===book)||pd.bookmakers?.[0];
+        if(!bk)continue;
+        for(const m of bk.markets||[]){
+          if(!['pitcher_strikeouts','pitcher_outs'].includes(m.key))continue;
+          const grp={};
+          for(const o of m.outcomes||[]){const n=o.description||o.name;if(!grp[n])grp[n]={};if(o.name==='Over')grp[n].over=o;if(o.name==='Under')grp[n].under=o;}
+          for(const[pitcher,s]of Object.entries(grp)){
+            const line=s.over?.point||s.under?.point||'--';
+            const oo=s.over?.price?(s.over.price>0?'+'+s.over.price:s.over.price):'--';
+            const uo=s.under?.price?(s.under.price>0?'+'+s.under.price:s.under.price):'--';
+            const coors=ev.home_team?.includes('Rockies')?'⚠️':'';
+            allRows.push({game:`${ev.away_team} @ ${ev.home_team}`,coors,pitcher,market:m.key==='pitcher_strikeouts'?'Ks':'Outs',oo,uo,line,time:ev.commence_time});
+          }
+        }
+      }catch(e){continue;}
+    }
+    const used2=evRes.headers.get('x-requests-used');
+    statusEl.innerHTML=`<span style="color:var(--green)">✓ Done</span> · ${allRows.length} props loaded · requests used: ${used2}`;
+    if(!allRows.length){resultsEl.innerHTML=`<div style="padding:16px;background:var(--surface2);border-radius:8px;font-size:13px;color:var(--amber)">⚠️ No pitcher prop lines found for ${book}. This book may not offer pitcher props or your plan may not include player props. Try switching to DraftKings or FanDuel.</div>`;} 
+    else{resultsEl.innerHTML=`<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Game</th><th>Pitcher</th><th>Market</th><th>Over</th><th>Under</th><th>Line</th></tr></thead><tbody>${allRows.map(r=>`<tr><td style="font-size:11px">${r.game} ${r.coors}</td><td class="highlight">${r.pitcher}</td><td><span class="market-tag">${r.market}</span></td><td class="mono" style="color:var(--green)">${r.oo}</td><td class="mono" style="color:var(--red)">${r.uo}</td><td class="mono">${r.line}</td></tr>`).join('')}</tbody></table></div>`;}
+    toast(`${allRows.length} prop lines loaded`,'success');
   }catch(e){statusEl.innerHTML=`<span style="color:var(--red)">✗ ${e.message}</span>`;toast('API error: '+e.message,'error');}
   btn.innerHTML='Refresh Lines';btn.disabled=false;
 }
