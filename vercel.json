@@ -1,0 +1,5 @@
+api/
+  data.js
+README.md
+index.html
+vercel.json   ← needs to be here
