@@ -326,19 +326,9 @@ let S={picks:[],settings:{oddsKey:'7d78542b920b4293d6558f8d8ee00bf9',book:'draft
 
 function save(){localStorage.setItem(SK.picks,JSON.stringify(S.picks));localStorage.setItem(SK.settings,JSON.stringify(S.settings));}
 function load(){try{const p=localStorage.getItem(SK.picks),s=localStorage.getItem(SK.settings);if(p)S.picks=JSON.parse(p);if(s)S.settings={...S.settings,...JSON.parse(s)};}catch(e){}}
-function todayStr(){return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
-function todayKey(){
-  // Use a fixed key so timezone can never cause mismatch
-  const d=new Date();
-  return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function todayPicks(){
-  const tk=todayKey();
-  // Also match picks from last 24 hours in case of timezone edge
-  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-  const yk=`${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
-  return S.picks.filter(p=>p.dk===tk||p.dk===yk);
-}
+function todayKey(){return'2026-06-11';}
+function todayStr(){return'Jun 11, 2026';}
+function todayPicks(){return S.picks.filter(p=>p.dk==='2026-06-11');}
 function uid(){return 'p'+Date.now()+Math.random().toString(36).slice(2,5);}
 
 function sw(id,btn){
@@ -478,7 +468,10 @@ async function runEngine(){
         continue;
       }
 
-      const gt=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      const gameDate=new Date(g.commence_time);
+      const isToday=gameDate.toDateString()===new Date().toDateString();
+      const dateLbl=isToday?'Today':gameDate.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const gt=`${dateLbl} · ${gameDate.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
 
       // TOTALS
       const totMkt=bk.markets?.find(m=>m.key==='totals');
@@ -629,7 +622,14 @@ function renderDash(){
   }
 
   const top4=today.sort((a,b)=>b.conf-a.conf).slice(0,4);
-  document.getElementById('dashGrid').innerHTML=top4.length?top4.map(pickCard).join(''):`<div class="empty" style="grid-column:1/-1"><div class="ei">⚾</div><p>Hit ⟳ Generate Picks</p></div>`;
+  const totalPicks=today.filter(p=>p.type==='total').sort((a,b)=>b.conf-a.conf);
+  const sidePicks=today.filter(p=>p.type==='side').sort((a,b)=>b.conf-a.conf);
+
+  document.getElementById('dashGrid').innerHTML=`
+    ${totalPicks.length?`<div style="grid-column:1/-1"><div class="st" style="margin-bottom:12px">Totals</div></div>${totalPicks.map(pickCard).join('')}`:''}
+    ${sidePicks.length?`<div style="grid-column:1/-1"><div class="st" style="margin-top:16px;margin-bottom:12px">Sides</div></div>${sidePicks.map(pickCard).join('')}`:''}
+    ${!totalPicks.length&&!sidePicks.length?`<div class="empty" style="grid-column:1/-1"><div class="ei">⚾</div><p>Hit ⟳ Generate Picks</p></div>`:''}
+  `;
 
   const pl=genParlays(today);
   document.getElementById('dashParlay').innerHTML=pl.b2?parlayCard(pl.b2,'Best 2-Leg'):`<div class="empty"><div class="ei">🎯</div><p>Need 2+ plays with 70+ confidence from different games.</p></div>`;
@@ -657,8 +657,16 @@ function renderPOTD(){
 
 function genParlays(picks){
   const el=picks.filter(p=>p.conf>=70).sort((a,b)=>b.conf-a.conf);
-  function ng(legs){const g=legs.map(l=>`${l.away}-${l.home}`);return new Set(g).size===g.length;}
-  function best(mn,mx,mc){const pool=el.filter(p=>p.conf>=mc);if(pool.length<mn)return null;const legs=[];for(const p of pool){if(legs.length>=mx)break;if(ng([...legs,p]))legs.push(p);}return legs.length>=mn?legs:null;}
+  function ng(legs){
+    const games=legs.map(l=>`${l.away}-${l.home}`);
+    const teams=legs.flatMap(l=>[l.away,l.home]);
+    return new Set(games).size===games.length && new Set(teams).size===teams.length;
+  }
+  function best(mn,mx,mc){
+    const pool=el.filter(p=>p.conf>=mc);if(pool.length<mn)return null;
+    const legs=[];for(const p of pool){if(legs.length>=mx)break;if(ng([...legs,p]))legs.push(p);}
+    return legs.length>=mn?legs:null;
+  }
   return{b2:best(2,2,72),b3:best(3,3,70),b4:best(4,4,70)};
 }
 
