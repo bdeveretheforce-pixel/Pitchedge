@@ -1,18 +1,1 @@
-export const config = { runtime: 'edge' };
-
-const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-
-export default async function handler(req) {
-  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
-  const { searchParams } = new URL(req.url);
-  const oddsKey = searchParams.get('oddsKey') || '';
-  const book = searchParams.get('book') || 'draftkings';
-  try {
-    const res = await fetch(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${oddsKey}&regions=us&markets=totals,h2h&bookmakers=${book}&oddsFormat=american`);
-    const data = await res.json();
-    const remaining = res.headers.get('x-requests-remaining') || '?';
-    return new Response(JSON.stringify({ games: Array.isArray(data) ? data : [], remaining }), { headers: CORS });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS });
-  }
-}
+{}
