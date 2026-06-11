@@ -364,7 +364,6 @@ function ring(s){
 // SCORING ENGINE
 // ============================================================
 function scoreTotal(dir,line,aT,hT){
-  if(hT.name==='Colorado Rockies') return 0; // Coors hard pass
   let score=50;
   const trueAvg=(aT.rsg+hT.rsg+aT.rag+hT.rag)/2;
   const diff=trueAvg-line;
@@ -479,35 +478,24 @@ async function runEngine(){
         continue;
       }
 
-      const isCoors=homeName==='Colorado Rockies';
       const gt=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
 
       // TOTALS
       const totMkt=bk.markets?.find(m=>m.key==='totals');
-      if(totMkt&&!isCoors){
+      if(totMkt){
         const overOut=totMkt.outcomes?.find(o=>o.name==='Over');
         const underOut=totMkt.outcomes?.find(o=>o.name==='Under');
         const line=overOut?.point||underOut?.point;
         if(line){
           const oScore=scoreTotal('over',line,aT,hT);
           const uScore=scoreTotal('under',line,aT,hT);
-          const oo=overOut?.price?(overOut.price>0?'+'+overOut.price:String(overOut.price)):'-110';
-          const uo=underOut?.price?(underOut.price>0?'+'+underOut.price:String(underOut.price)):'-110';
           const trueAvg=(aT.rsg+hT.rsg+aT.rag+hT.rag)/2;
-
-          // Always generate the better side
           const bestDir=oScore>=uScore?'over':'under';
-          const bestScore=oScore>=uScore?oScore:uScore;
-          const bestOdds=bestDir==='over'?oo:uo;
-          picks.push({id:uid(),type:'total',away:awayName,home:homeName,gameTime:gt,dir:bestDir,line,openLine:line,odds:bestOdds,conf:bestScore,reason:totalReason(bestDir,line,aT,hT),aRSG:aT.rsg,hRSG:hT.rsg,aRAG:aT.rag,hRAG:hT.rag,trueAvg:trueAvg.toFixed(2),result:'pending',dk:todayKey(),closeLine:null,createdAt:new Date().toISOString(),manual:false});
+          const bestScore=Math.max(oScore,uScore);
+          const bestOdds=bestDir==='over'?(overOut?.price?(overOut.price>0?'+'+overOut.price:String(overOut.price)):'-110'):(underOut?.price?(underOut.price>0?'+'+underOut.price:String(underOut.price)):'-110');
 
-          // Also push the other side if both are interesting
-          const altDir=bestDir==='over'?'under':'over';
-          const altScore=bestDir==='over'?uScore:oScore;
-          const altOdds=bestDir==='over'?uo:oo;
-          if(altScore>=60){
-            picks.push({id:uid(),type:'total',away:awayName,home:homeName,gameTime:gt,dir:altDir,line,openLine:line,odds:altOdds,conf:altScore,reason:totalReason(altDir,line,aT,hT),aRSG:aT.rsg,hRSG:hT.rsg,aRAG:aT.rag,hRAG:hT.rag,trueAvg:trueAvg.toFixed(2),result:'pending',dk:todayKey(),closeLine:null,createdAt:new Date().toISOString(),manual:false});
-          }
+          // ALWAYS push - no threshold
+          picks.push({id:uid(),type:'total',away:awayName,home:homeName,gameTime:gt,dir:bestDir,line,openLine:line,odds:bestOdds,conf:bestScore,reason:`${awayName} @ ${homeName}: true avg ${trueAvg.toFixed(2)} vs line ${line}. ${bestDir.toUpperCase()} scores ${bestScore}.`,aRSG:aT.rsg,hRSG:hT.rsg,aRAG:aT.rag,hRAG:hT.rag,trueAvg:trueAvg.toFixed(2),result:'pending',dk:todayKey(),closeLine:null,createdAt:new Date().toISOString(),manual:false});
         }
       }
 
@@ -519,8 +507,8 @@ async function runEngine(){
         const fmt=p=>p!=null?(p>0?'+'+p:String(p)):null;
         const aScore=scoreSide('away',aT,hT,awayML?.price);
         const hScore=scoreSide('home',hT,aT,homeML?.price);
-        if(aScore>=58&&awayML?.price) picks.push({id:uid(),type:'side',away:awayName,home:homeName,gameTime:gt,dir:'away',line:null,odds:fmt(awayML.price),conf:aScore,reason:sideReason(aT,hT),favWP:aT.wp,favRD:aT.rd,result:'pending',dk:todayKey(),closeLine:null,createdAt:new Date().toISOString(),manual:false});
-        if(hScore>=58&&homeML?.price) picks.push({id:uid(),type:'side',away:awayName,home:homeName,gameTime:gt,dir:'home',line:null,odds:fmt(homeML.price),conf:hScore,reason:sideReason(hT,aT),favWP:hT.wp,favRD:hT.rd,result:'pending',dk:todayKey(),closeLine:null,createdAt:new Date().toISOString(),manual:false});
+        if(awayML?.price) picks.push({id:uid(),type:'side',away:awayName,home:homeName,gameTime:gt,dir:'away',line:null,odds:fmt(awayML.price),conf:aScore,reason:sideReason(aT,hT),favWP:aT.wp,favRD:aT.rd,result:'pending',dk:todayKey(),closeLine:null,createdAt:new Date().toISOString(),manual:false});
+        if(homeML?.price) picks.push({id:uid(),type:'side',away:awayName,home:homeName,gameTime:gt,dir:'home',line:null,odds:fmt(homeML.price),conf:hScore,reason:sideReason(hT,aT),favWP:hT.wp,favRD:hT.rd,result:'pending',dk:todayKey(),closeLine:null,createdAt:new Date().toISOString(),manual:false});
       }
     }
 
